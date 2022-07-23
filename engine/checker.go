@@ -5,6 +5,9 @@ type Checker interface {
 	Name() string
 }
 
+//DefaultChecker is a default implementation of Checker
+// if you want simple checker without implementation Checker interface
+// tou can call this function and receive Checker interface
 type DefaultChecker struct {
 	CheckFunc func() error `json:"check"`
 	NameCheck string       `json:"name"`

@@ -20,9 +20,41 @@ type engineCfg struct {
 	ShutdownTimeout time.Duration `json:"shutdown_timeout" envconfig:"SHUTDOWN_TIMEOUT" default:"30s"`
 }
 
-//todo add http and grpc server
+type ServerOpt func(*Server)
+
+//WithDisableBanner disable witcher Banner
+func WithDisableBanner() ServerOpt {
+	return func(s *Server) {
+		s.disableBanner = true
+	}
+}
+
+//WithShutdownTimeout set shutdown timeout
+//
+// timeout is duration for graceful shutdown
+func WithShutdownTimeout(timeout time.Duration) ServerOpt {
+	return func(s *Server) {
+		s.shutdownTimeout = timeout
+	}
+}
+
+//WithDebugPort set debug port
+// use value with `:` for example: :8084
+func WithDebugPort(port string) ServerOpt {
+	return func(server *Server) {
+		server.PORT = port
+	}
+}
 
 //Server is app engine with debug server
+//
+// Use AddCloser to add closer objects for shutdown your application gracefully(for more information see AddCloser)
+//
+// Use AddActor to add actor control you background task(for more information see AddActor)
+//
+// Use AddChecker to add checker for live probe(for more information see AddChecker)
+//
+// You can change config engine use ENV variables DEBUG_PORT and SHUTDOWN_TIMEOUT(for example 30s)
 type Server struct {
 	*DebugServer
 
@@ -34,8 +66,12 @@ type Server struct {
 
 	runGroup      run.Group
 	errorRunGroup error
+
+	//options
+	disableBanner bool
 }
 
+//Run start your server
 func (s *Server) Run() error {
 	log.Infof("Starting ...")
 
@@ -76,12 +112,6 @@ func (s *Server) Run() error {
 	return nil
 }
 
-func (s *Server) introduce() {
-	log.Infof("Server Is Ready")
-	log.Infof(introduce, s.PORT)
-	log.Infof(logo)
-}
-
 func (s *Server) getErrRunGroup() error {
 	s.m.Lock()
 	defer s.m.Unlock()
@@ -108,6 +138,10 @@ func (s *Server) runRunGroup() {
 	}))
 }
 
+//AddActor add actor control you background task
+// you have execute function and done function(interrupt function)
+// interrupt function handle the error
+// execute function is called when server is ready
 func (s *Server) AddActor(execute func() error, interrupt func(err error)) {
 	s.m.Lock()
 	defer s.m.Unlock()
@@ -115,6 +149,9 @@ func (s *Server) AddActor(execute func() error, interrupt func(err error)) {
 	s.runGroup.Add(execute, interrupt)
 }
 
+//AddCloser add closer object for shutdown your application gracefully
+// you need to handle the context and call wg.Done() when done
+//
 func (s *Server) AddCloser(closer Closer) {
 	s.m.Lock()
 	defer s.m.Unlock()
@@ -128,6 +165,11 @@ func (s *Server) AddClosers(closers []Closer) {
 	}
 }
 
+//Shutdown server
+//
+// Timeout is duration for graceful shutdown
+// If all goroutines are finished, server will be shutdown
+// or timeout will be reached, server will be shutdown force
 func (s *Server) Shutdown() error {
 	s.m.Lock()
 	defer s.m.Unlock()
@@ -187,13 +229,18 @@ func (s *Server) closeClosers(ctx context.Context) error {
 	return nil
 }
 
+//GetCTX return context of your engine
 func (s *Server) GetCTX() context.Context {
 	s.m.Lock()
 	defer s.m.Unlock()
 	return s.ctx
 }
 
-func NewServer() *Server {
+//NewServer create new server
+//
+//You can change config engine use ENV variables DEBUG_PORT and SHUTDOWN_TIMEOUT(for example 30s)
+// or use With function
+func NewServer(opt ...ServerOpt) *Server {
 	var cfg engineCfg
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -213,6 +260,10 @@ func NewServer() *Server {
 		cancelFunc:      cancel,
 		runGroup:        run.Group{},
 		closerGroup:     make([]Closer, 0, 10),
+	}
+
+	for _, opt := range opt {
+		opt(&s)
 	}
 	return &s
 }
