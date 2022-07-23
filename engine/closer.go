@@ -11,6 +11,9 @@ type Closer interface {
 	Close(ctx context.Context, wg *sync.WaitGroup) error
 }
 
+//DefaultCloser is a default implementation of Closer
+// if you want simple checker without implementation Closer interface
+// tou can call this function and receive Closer interface
 type DefaultCloser struct {
 	Name      string                                              `json:"name"`
 	CloseFunc func(ctx context.Context, wg *sync.WaitGroup) error `json:"close"`

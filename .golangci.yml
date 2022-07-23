@@ -44,15 +44,5 @@ linters:
     - goconst
     - gosec
     - goimports
-    - megacheck
     - exportloopref
-
-issues:
-  exclude-use-default: false
-  exclude:
-    - G104
-    - (comment on exported (method|function|type|const)|should have( a package)? comment|comment should be of the form)
-    - should have a package comment, unless it's in another file for this package
-    - Error return value of .((os\.)?std(out|err)\..*|.*Close|.*Flush|os\.Remove(All)?|.*printf?|os\.(Un)?Setenv|.*Rollback). is not checked
-    - should check returned error before deferring
-    - declaration of "ok" shadows declaration
+    - gofmt
