@@ -42,6 +42,9 @@ func NewDebugServer(port string) *DebugServer {
 	return debug
 }
 
+//SetReady set server ready
+//
+// warning use this method only when you sure that server is ready
 func (d *DebugServer) SetReady(ready bool) {
 	d.m.Lock()
 	defer d.m.Unlock()
@@ -60,25 +63,41 @@ func (d *DebugServer) AddChecker(checker Checker) {
 	d.checkers = append(d.checkers, checker)
 }
 
+//AddCheckers for check your server is live
 func (d *DebugServer) AddCheckers(checkers []Checker) {
 	for _, checker := range checkers {
 		d.AddChecker(checker)
 	}
 }
 
+//Live is probe checker
 func (d *DebugServer) Live(c echo.Context) error {
 	log.Infof("Live check at %s", time.Now())
 	d.m.Lock()
 	defer d.m.Unlock()
+
+	info := make(map[string]bool)
+
+	live := true
+
 	for i := range d.checkers {
 		if err := d.checkers[i].Check(); err != nil {
-			log.Errorf("Checker %s failed: %s", d.checkers[i].Name(), err)
-			return c.String(http.StatusInternalServerError, err.Error())
+			log.Errorf("Server is not live: %s", err)
+			live = false
+			info[d.checkers[i].Name()] = false
+		} else {
+			info[d.checkers[i].Name()] = true
 		}
 	}
-	return c.String(http.StatusOK, "OK")
+
+	if !live {
+		log.Errorf("Server is not live")
+		return c.JSON(http.StatusInternalServerError, info)
+	}
+	return c.JSON(http.StatusOK, info)
 }
 
+//Ready is probe checker
 func (d *DebugServer) Ready(c echo.Context) error {
 	log.Infof("Ready check at %s", time.Now())
 	if d.ready {

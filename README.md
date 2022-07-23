@@ -1,7 +1,7 @@
 # WITCHER
-
-Golang web-app engine. Completely ready to work in a cluster!
-
+![Sourcegraph](https://sourcegraph.com/github.com/glebnaz/witcher/-/badge.svg?style=flat-square)
+![License](http://img.shields.io/badge/license-mit-blue.svg?style=flat-square)
+[![Release](https://img.shields.io/github/release/glebnaz/witcher.svg?style=flat-square)](https://github.com/glebnaz/witcher/releases)
 
 
 ⠀⠀⠀⠀⠀⠀⢠⣾⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣳⡄⠀⠀⠀⠀⠀⠀
@@ -29,10 +29,14 @@ Golang web-app engine. Completely ready to work in a cluster!
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡇⡄⠀⠀⠀⠀⢠⢸⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⣧⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢃⡷⢠⣤⣤⡄⢾⡸⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢨⣥⣬⣉⣉⣥⣬⡅⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⠿⢿⣿⣿⡿⠿⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⠿⢿⣿⣿⡿⠿⠃⠀⠀⠀⠀⠀⠀⠀⠀
+
+Golang web-app engine. Completely ready to work in a cluster!
 
 
-## Example
+## Quckstart
+
+```
 
 ```go
 package main
@@ -86,3 +90,24 @@ func main() {
 	}
 }
 ```
+
+## Debug Server
+
+### Handlers
+In your Debug server you have tree handlers: 
+
+/live - live probe 
+/ready - ready probe
+/metrics - metrics prometheus type
+
+By default, the server is listening on port 8084. You can change it by setting the environment variable `PORT`.
+Or you can set port by WithDebugPort("your_port)
+
+### Check function
+You can add checkers and closers by AddChecker and AddCloser. And add actors by AddActor.
+Checkers use for live probe, Actor is for goroutine control, Closer is for graceful shutdown.
+
+## Metrics
+Use metrics prometheus type. Use metrics pkg to register metrics.
+
+
