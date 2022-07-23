@@ -1,12 +1,20 @@
-module github.com/glebnaz/go-platform
+module github.com/glebnaz/witcher
 
 go 1.15
 
 require (
-	github.com/labstack/echo v3.3.10+incompatible
-	github.com/labstack/gommon v0.3.0 // indirect
-	github.com/prometheus/client_golang v1.11.0
-	github.com/sirupsen/logrus v1.6.0
-	github.com/teris-io/shortid v0.0.0-20201117134242-e59966efd125
-	google.golang.org/grpc v1.40.0
+	github.com/google/go-cmp v0.5.8 // indirect
+	github.com/kelseyhightower/envconfig v1.4.0
+	github.com/kr/text v0.2.0 // indirect
+	github.com/labstack/echo/v4 v4.7.2
+	github.com/mattn/go-colorable v0.1.12 // indirect
+	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
+	github.com/oklog/run v1.1.0
+	github.com/prometheus/client_golang v1.12.1
+	github.com/sirupsen/logrus v1.9.0
+	github.com/stretchr/testify v1.8.0 // indirect
+	golang.org/x/crypto v0.0.0-20220525230936-793ad666bf5e // indirect
+	golang.org/x/net v0.0.0-20220520000938-2e3eb7b945c2 // indirect
+	google.golang.org/protobuf v1.28.0 // indirect
+	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 )
