@@ -1,9 +1,7 @@
-[![Sourcegraph](https://sourcegraph.com/github.com/glebnaz/witcher/-/badge.svg?style=flat-square)]
-
 # WITCHER
-
-Golang web-app engine. Completely ready to work in a cluster!
-
+![Sourcegraph](https://sourcegraph.com/github.com/glebnaz/witcher/-/badge.svg?style=flat-square)
+![License](http://img.shields.io/badge/license-mit-blue.svg?style=flat-square)
+[![Release](https://img.shields.io/github/release/glebnaz/witcher.svg?style=flat-square)](https://github.com/glebnaz/witcher/releases)
 
 
 ⠀⠀⠀⠀⠀⠀⢠⣾⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣳⡄⠀⠀⠀⠀⠀⠀
@@ -31,7 +29,9 @@ Golang web-app engine. Completely ready to work in a cluster!
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡇⡄⠀⠀⠀⠀⢠⢸⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⣧⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢃⡷⢠⣤⣤⡄⢾⡸⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢨⣥⣬⣉⣉⣥⣬⡅⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⠿⢿⣿⣿⡿⠿⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⠿⢿⣿⣿⡿⠿⠃⠀⠀⠀⠀⠀⠀⠀⠀
+
+Golang web-app engine. Completely ready to work in a cluster!
 
 
 ## Quckstart
