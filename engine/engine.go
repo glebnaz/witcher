@@ -84,7 +84,7 @@ func (s *Server) Run() error {
 		return nil
 	}, func(err error) {
 		if err != nil {
-			log.Errorf("Error Run Debug Server: %s", err)
+			log.Fatalf("Error Run Debug Server: %s", err)
 		}
 	})
 
