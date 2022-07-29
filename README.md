@@ -36,8 +36,6 @@ Golang web-app engine. Completely ready to work in a cluster!
 
 ## Quckstart
 
-```
-
 ```go
 package main
 
@@ -99,6 +97,10 @@ In your Debug server you have tree handlers:
 /live - live probe 
 /ready - ready probe
 /metrics - metrics prometheus type
+
+#### PPROF
+On your Debug server you can use pprof to see the CPU and memory usage of your application.
+Go to "/" to see start page of pprof. 
 
 By default, the server is listening on port 8084. You can change it by setting the environment variable `PORT`.
 Or you can set port by WithDebugPort("your_port)

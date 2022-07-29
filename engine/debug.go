@@ -6,8 +6,6 @@ import (
 	"sync"
 	"time"
 
-	pprof "github.com/sevennt/echo-pprof"
-
 	"github.com/glebnaz/witcher/metrics"
 
 	"github.com/labstack/echo/v4"
@@ -39,7 +37,6 @@ func NewDebugServer(port string) *DebugServer {
 	e.GET("/ready", debug.Ready)
 	e.GET("/live", debug.Live)
 	e.GET("/metrics", echo.WrapHandler(metrics.Handler()))
-	e.GET("/pprof", pprof.IndexHandler())
 	wrapPProf(e)
 	debug.engine = e
 
