@@ -45,4 +45,3 @@ linters:
     - gosec
     - goimports
     - exportloopref
-    - gofmt
