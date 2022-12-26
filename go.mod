@@ -13,6 +13,7 @@ require (
 	github.com/prometheus/client_golang v1.12.1
 	github.com/sirupsen/logrus v1.9.0
 	github.com/stretchr/testify v1.8.0 // indirect
+	go.mongodb.org/mongo-driver v1.11.1 // indirect
 	golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa // indirect
 	golang.org/x/net v0.0.0-20220728211354-c7608f3a8462 // indirect
 	google.golang.org/protobuf v1.28.0 // indirect
