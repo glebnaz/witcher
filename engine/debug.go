@@ -2,6 +2,7 @@ package engine
 
 import (
 	"context"
+	"github.com/glebnaz/witcher/swagger"
 	"net/http"
 	"sync"
 	"time"
@@ -37,6 +38,15 @@ func NewDebugServer(port string) *DebugServer {
 	e.GET("/ready", debug.Ready)
 	e.GET("/live", debug.Live)
 	e.GET("/metrics", echo.WrapHandler(metrics.Handler()))
+
+	//file, err := os.Open("/Users/glebnaz/Documents/#main/workspace/go-platform/swagger/swagger.json")
+	//fmt.Println(err)
+	//data, err := io.ReadAll(file)
+	//fmt.Println(err)
+	err := swagger.AddSwagger(e, "/Users/glebnaz/Documents/#main/workspace/go-platform/swagger.json")
+	if err != nil {
+		log.Errorf("Error adding swagger: %s", err)
+	}
 	wrapPProf(e)
 	debug.engine = e
 
