@@ -51,7 +51,7 @@ func (d *DebugServer) SetReady(ready bool) {
 	defer d.m.Unlock()
 	d.ready = ready
 	if ready {
-		log.Infof("Server is ready")
+		log.Infof("Server set ready")
 	} else {
 		log.Infof("Server is not ready")
 	}
