@@ -10,6 +10,8 @@ import (
 	"sync"
 	"time"
 
+	"google.golang.org/grpc"
+
 	"github.com/kelseyhightower/envconfig"
 	"github.com/oklog/run"
 	log "github.com/sirupsen/logrus"
@@ -46,6 +48,13 @@ func WithDebugPort(port string) ServerOpt {
 	}
 }
 
+func WithGRPCServer(grpcServer *grpc.Server, port string, shutdownTimeout time.Duration) ServerOpt {
+	return func(s *Server) {
+		runner := newGRPCServerRunner(grpcServer, port, shutdownTimeout)
+		s.grpcServerRunner = runner
+	}
+}
+
 //Server is app engine with debug server
 //
 // Use AddCloser to add closer objects for shutdown your application gracefully(for more information see AddCloser)
@@ -69,6 +78,8 @@ type Server struct {
 
 	//options
 	disableBanner bool
+
+	grpcServerRunner *grpcServerRunner
 }
 
 //Run start your server
@@ -87,6 +98,10 @@ func (s *Server) Run() error {
 			log.Fatalf("Error Run Debug Server: %s", err)
 		}
 	})
+
+	if s.grpcServerRunner != nil {
+		s.AddActor(s.grpcServerRunner.actor())
+	}
 
 	s.runRunGroup()
 
@@ -254,12 +269,13 @@ func NewServer(opt ...ServerOpt) *Server {
 	debug := NewDebugServer(cfg.DebugPort)
 
 	s := Server{
-		DebugServer:     debug,
-		shutdownTimeout: cfg.ShutdownTimeout,
-		ctx:             ctx,
-		cancelFunc:      cancel,
-		runGroup:        run.Group{},
-		closerGroup:     make([]Closer, 0, 10),
+		DebugServer:      debug,
+		shutdownTimeout:  cfg.ShutdownTimeout,
+		ctx:              ctx,
+		cancelFunc:       cancel,
+		runGroup:         run.Group{},
+		closerGroup:      make([]Closer, 0, 10),
+		grpcServerRunner: nil,
 	}
 
 	for _, opt := range opt {
