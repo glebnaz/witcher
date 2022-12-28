@@ -2,10 +2,11 @@ package main
 
 import (
 	"context"
-	"github.com/glebnaz/witcher/db/mongo"
-	"google.golang.org/grpc"
 	"sync"
 	"time"
+
+	"github.com/glebnaz/witcher/db/mongo"
+	"google.golang.org/grpc"
 
 	"github.com/glebnaz/witcher/engine"
 	log "github.com/sirupsen/logrus"

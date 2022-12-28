@@ -2,11 +2,12 @@ package engine
 
 import (
 	"context"
+	"net"
+	"time"
+
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
-	"net"
-	"time"
 )
 
 type grpcServerRunner struct {
