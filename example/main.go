@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/glebnaz/witcher/metrics"
 	"sync"
 	"time"
 
@@ -18,7 +19,7 @@ func main() {
 		DisableColors: false,
 	})
 
-	serverGRPC := grpc.NewServer()
+	serverGRPC := grpc.NewServer(grpc.UnaryInterceptor(metrics.ServerMetricsUnaryInterceptor("test")))
 	s := engine.NewServer(engine.WithGRPCServer(serverGRPC, ":8082", time.Second*5))
 
 	checker1 := engine.NewDefaultChecker("checker false", func() error {
