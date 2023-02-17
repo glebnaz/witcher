@@ -16,25 +16,25 @@ import (
 //
 //
 //// For every RPC it exports the following metrics:
-//// - server_http_request_count{method, code}
-//// - server_http_response_time{method}
+//// - server_http_request_count{method,path,code}
+//// - server_http_response_time{method,path}
 func EchoMiddleware(namespace string) echo.MiddlewareFunc {
 	var serverRequestCounter = MustRegisterCounterVec("server_http_request_count",
 		namespace,
-		"server_request_count", []string{"method", "code"})
+		"server_request_count", []string{"method", "path", "code"})
 
 	var serverResponseTime = MustRegisterHistogramVec("server_http_response_time",
 		namespace,
 		"server response time in seconds",
-		TimeBucketsMedium, []string{"method"})
+		TimeBucketsMedium, []string{"method", "path"})
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			startTime := time.Now()
 			err := next(c)
 			statusCode := fmt.Sprintf("%d", c.Response().Status)
 			tookTime := float64(time.Since(startTime)) / float64(time.Second)
-			serverResponseTime.WithLabelValues(c.Request().Method).Observe(tookTime)
-			serverRequestCounter.WithLabelValues(c.Request().Method, statusCode).Inc()
+			serverResponseTime.WithLabelValues(c.Request().Method, c.Request().RequestURI).Observe(tookTime)
+			serverRequestCounter.WithLabelValues(c.Request().Method, c.Request().RequestURI, statusCode).Inc()
 			return err
 		}
 	}
