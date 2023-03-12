@@ -2,15 +2,14 @@ package main
 
 import (
 	"context"
-	"github.com/glebnaz/witcher/metrics"
 	"sync"
 	"time"
 
 	"github.com/glebnaz/witcher/db/mongo"
-	"google.golang.org/grpc"
-
 	"github.com/glebnaz/witcher/engine"
+	"github.com/glebnaz/witcher/metrics"
 	log "github.com/sirupsen/logrus"
+	"google.golang.org/grpc"
 )
 
 func main() {

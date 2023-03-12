@@ -43,7 +43,7 @@ func NewDebugServer(port string) *DebugServer {
 	return debug
 }
 
-//SetReady set server ready
+// SetReady set server ready
 //
 // warning use this method only when you sure that server is ready
 func (d *DebugServer) SetReady(ready bool) {
@@ -64,14 +64,14 @@ func (d *DebugServer) AddChecker(checker Checker) {
 	d.checkers = append(d.checkers, checker)
 }
 
-//AddCheckers for check your server is live
+// AddCheckers for check your server is live
 func (d *DebugServer) AddCheckers(checkers []Checker) {
 	for _, checker := range checkers {
 		d.AddChecker(checker)
 	}
 }
 
-//Live is probe checker
+// Live is probe checker
 func (d *DebugServer) Live(c echo.Context) error {
 	log.Infof("Live check at %s", time.Now())
 	d.m.Lock()
@@ -98,7 +98,7 @@ func (d *DebugServer) Live(c echo.Context) error {
 	return c.JSON(http.StatusOK, info)
 }
 
-//Ready is probe checker
+// Ready is probe checker
 func (d *DebugServer) Ready(c echo.Context) error {
 	log.Infof("Ready check at %s", time.Now())
 	if d.ready {
