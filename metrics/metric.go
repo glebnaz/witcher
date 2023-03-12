@@ -93,8 +93,6 @@ func NewSummaryVec(name, namespace, help string, labelNames []string) *prometheu
 	}, labelNames)
 }
 
-var SummaryObjectives = map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001}
-
 // MustRegisterCounter creates and registers a new Counter.
 // Panics if any error occurs.
 func MustRegisterCounter(name, namespace, help string) prometheus.Counter {

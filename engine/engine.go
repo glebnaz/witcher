@@ -24,14 +24,14 @@ type engineCfg struct {
 
 type ServerOpt func(*Server)
 
-//WithDisableBanner disable witcher Banner
+// WithDisableBanner disable witcher Banner
 func WithDisableBanner() ServerOpt {
 	return func(s *Server) {
 		s.disableBanner = true
 	}
 }
 
-//WithShutdownTimeout set shutdown timeout
+// WithShutdownTimeout set shutdown timeout
 //
 // timeout is duration for graceful shutdown
 func WithShutdownTimeout(timeout time.Duration) ServerOpt {
@@ -40,7 +40,7 @@ func WithShutdownTimeout(timeout time.Duration) ServerOpt {
 	}
 }
 
-//WithDebugPort set debug port
+// WithDebugPort set debug port
 // use value with `:` for example: :8084
 func WithDebugPort(port string) ServerOpt {
 	return func(server *Server) {
@@ -55,7 +55,7 @@ func WithGRPCServer(grpcServer *grpc.Server, port string, shutdownTimeout time.D
 	}
 }
 
-//Server is app engine with debug server
+// Server is app engine with debug server
 //
 // Use AddCloser to add closer objects for shutdown your application gracefully(for more information see AddCloser)
 //
@@ -82,7 +82,7 @@ type Server struct {
 	grpcServerRunner *grpcServerRunner
 }
 
-//Run start your server
+// Run start your server
 func (s *Server) Run() error {
 	log.Infof("Starting ...")
 
@@ -153,7 +153,7 @@ func (s *Server) runRunGroup() {
 	}))
 }
 
-//AddActor add actor control you background task
+// AddActor add actor control you background task
 // you have execute function and done function(interrupt function)
 // interrupt function handle the error
 // execute function is called when server is ready
@@ -164,9 +164,8 @@ func (s *Server) AddActor(execute func() error, interrupt func(err error)) {
 	s.runGroup.Add(execute, interrupt)
 }
 
-//AddCloser add closer object for shutdown your application gracefully
+// AddCloser add closer object for shutdown your application gracefully
 // you need to handle the context and call wg.Done() when done
-//
 func (s *Server) AddCloser(closer Closer) {
 	s.m.Lock()
 	defer s.m.Unlock()
@@ -180,7 +179,7 @@ func (s *Server) AddClosers(closers []Closer) {
 	}
 }
 
-//Shutdown server
+// Shutdown server
 //
 // Timeout is duration for graceful shutdown
 // If all goroutines are finished, server will be shutdown
@@ -244,16 +243,16 @@ func (s *Server) closeClosers(ctx context.Context) error {
 	return nil
 }
 
-//GetCTX return context of your engine
+// GetCTX return context of your engine
 func (s *Server) GetCTX() context.Context {
 	s.m.Lock()
 	defer s.m.Unlock()
 	return s.ctx
 }
 
-//NewServer create new server
+// NewServer create new server
 //
-//You can change config engine use ENV variables DEBUG_PORT and SHUTDOWN_TIMEOUT(for example 30s)
+// You can change config engine use ENV variables DEBUG_PORT and SHUTDOWN_TIMEOUT(for example 30s)
 // or use With function
 func NewServer(opt ...ServerOpt) *Server {
 	var cfg engineCfg
