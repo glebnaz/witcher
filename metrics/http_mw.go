@@ -2,8 +2,9 @@ package metrics
 
 import (
 	"fmt"
-	"github.com/labstack/echo/v4"
 	"time"
+
+	"github.com/labstack/echo/v4"
 )
 
 // EchoMiddleware is a middleware for echo framework
@@ -14,10 +15,9 @@ import (
 // https://echo.labstack.com/cookbook/middleware
 // https://echo.labstack.com/cookbook/middleware#custom-middleware
 //
-//
-//// For every RPC it exports the following metrics:
-//// - server_http_request_count{method,path,code}
-//// - server_http_response_time{method,path}
+// // For every RPC it exports the following metrics:
+// // - server_http_request_count{method,path,code}
+// // - server_http_response_time{method,path}
 func EchoMiddleware(namespace string) echo.MiddlewareFunc {
 	var serverRequestCounter = MustRegisterCounterVec("server_http_request_count",
 		namespace,

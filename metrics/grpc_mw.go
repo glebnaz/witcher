@@ -2,17 +2,18 @@ package metrics
 
 import (
 	"context"
-	"google.golang.org/grpc"
 	"time"
+
+	"google.golang.org/grpc"
 )
 
 // ServerMetricsUnaryInterceptor
-//is a gRPC server-side interceptor that provides Prometheus monitoring for Unary RPCs.
+// is a gRPC server-side interceptor that provides Prometheus monitoring for Unary RPCs.
 //
 // For every RPC it exports the following metrics:
 // - server_grpc_request_count{method, code}
 // - server_grpc_response_time{method}
-//namespace here is a prefix for metrics name
+// namespace here is a prefix for metrics name
 func ServerMetricsUnaryInterceptor(namespace string) func(ctx context.Context,
 	req interface{},
 	info *grpc.UnaryServerInfo,
