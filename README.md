@@ -2,6 +2,7 @@
 ![Sourcegraph](https://sourcegraph.com/github.com/glebnaz/witcher/-/badge.svg?style=flat-square)
 ![License](http://img.shields.io/badge/license-mit-blue.svg?style=flat-square)
 [![Release](https://img.shields.io/github/release/glebnaz/witcher.svg?style=flat-square)](https://github.com/glebnaz/witcher/releases)
+[![Go Report Card](https://goreportcard.com/badge/github.com/glebnaz/witcher)](https://goreportcard.com/report/github.com/umputun/remark42)
 
 
 ⠀⠀⠀⠀⠀⠀⢠⣾⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣳⡄⠀⠀⠀⠀⠀⠀
