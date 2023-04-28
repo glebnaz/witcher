@@ -2,6 +2,7 @@
 ![Sourcegraph](https://sourcegraph.com/github.com/glebnaz/witcher/-/badge.svg?style=flat-square)
 ![License](http://img.shields.io/badge/license-mit-blue.svg?style=flat-square)
 [![Release](https://img.shields.io/github/release/glebnaz/witcher.svg?style=flat-square)](https://github.com/glebnaz/witcher/releases)
+[![Go Report Card](https://goreportcard.com/badge/github.com/glebnaz/witcher)](https://goreportcard.com/report/github.com/umputun/remark42)
 
 
 ⠀⠀⠀⠀⠀⠀⢠⣾⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣳⡄⠀⠀⠀⠀⠀⠀
@@ -31,8 +32,11 @@
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢨⣥⣬⣉⣉⣥⣬⡅⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⠿⢿⣿⣿⡿⠿⠃⠀⠀⠀⠀⠀⠀⠀⠀
 
-Golang web-app engine. Completely ready to work in a cluster!
+**Golang web-app engine. Completely ready to work in a cluster!**
 
+**Scale your web app effortlessly with our Golang engine built for clusters**
+
+# Documentation
 
 ## Quckstart
 
@@ -92,24 +96,27 @@ func main() {
 ## Debug Server
 
 ### Handlers
-In your Debug server you have tree handlers: 
+Your Debug server has three handlers:
 
-/live - live probe 
-/ready - ready probe
-/metrics - metrics prometheus type
+* /live - live probe
+
+* /ready - ready probe
+
+* /metrics - Prometheus metrics
 
 #### PPROF
-On your Debug server you can use pprof to see the CPU and memory usage of your application.
-Go to "/" to see start page of pprof. 
+You can use pprof to see the CPU and memory usage of your application on the Debug server. Go to "/" to see the start page of pprof.
 
-By default, the server is listening on port 8084. You can change it by setting the environment variable `PORT`.
-Or you can set port by WithDebugPort("your_port)
+By default, the server is listening on port 8084. You can change the port by setting the environment variable `PORT` or by using `WithDebugPort("your_port")`.
 
-### Check function
-You can add checkers and closers by AddChecker and AddCloser. And add actors by AddActor.
-Checkers use for live probe, Actor is for goroutine control, Closer is for graceful shutdown.
+### Check Function
+You can add checkers, closers, and actors to your server by using the `AddChecker`, `AddCloser`, and `AddActor` functions, respectively.
+
+Checkers are used for live probes, actors are used for goroutine control, and closers are used for graceful shutdown.
 
 ## Metrics
-Use metrics prometheus type. Use metrics pkg to register metrics.
+You can use the Prometheus metrics type with the `metrics` package to register metrics.
 
+## More Examples
+You can find more examples in the `example` folder.
 
