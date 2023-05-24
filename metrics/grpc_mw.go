@@ -2,8 +2,9 @@ package metrics
 
 import (
 	"context"
-	"google.golang.org/grpc/status"
 	"time"
+
+	"google.golang.org/grpc/status"
 
 	"google.golang.org/grpc"
 )
