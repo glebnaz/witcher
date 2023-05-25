@@ -43,15 +43,8 @@ func AddEntryToCTX(ctx context.Context, entry *logrus.Entry) context.Context {
 }
 
 // MustGetEntryFromCTX returns a *logrus.Entry from ctx
-func MustGetEntryFromCTX(ctx context.Context) (*logrus.Entry, bool) {
-	entry, ok := ctx.Value(entryKey).(*logrus.Entry)
-	if !ok {
-		return nil, false
-	}
-	return entry, true
-}
-
-func GetEntryFromCTX(ctx context.Context) *logrus.Entry {
+// if ctx has no *logrus.Entry, returns a new *logrus.Entry
+func MustGetEntryFromCTX(ctx context.Context) *logrus.Entry {
 	entry, ok := ctx.Value(entryKey).(*logrus.Entry)
 	if !ok {
 		return logrus.NewEntry(logrus.StandardLogger())
@@ -59,9 +52,17 @@ func GetEntryFromCTX(ctx context.Context) *logrus.Entry {
 	return entry
 }
 
+func GetEntryFromCTX(ctx context.Context) (*logrus.Entry, bool) {
+	entry, ok := ctx.Value(entryKey).(*logrus.Entry)
+	if !ok {
+		return nil, false
+	}
+	return entry, true
+}
+
 // NewEntryFormCTXWithFields returns a *logrus.Entry with fields from ctx
 func NewEntryFormCTXWithFields(ctx context.Context) *logrus.Entry {
-	entry := GetEntryFromCTX(ctx)
+	entry := MustGetEntryFromCTX(ctx)
 	fields := GetFieldsFromCTX(ctx)
 	return entry.WithFields(fields)
 }
