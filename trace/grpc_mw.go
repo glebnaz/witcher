@@ -2,6 +2,7 @@ package trace
 
 import (
 	"context"
+
 	"github.com/glebnaz/witcher/log"
 	"google.golang.org/grpc"
 )
