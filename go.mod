@@ -5,6 +5,7 @@ go 1.15
 require (
 	github.com/golang/snappy v0.0.3 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
+	github.com/google/uuid v1.3.0 // indirect
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/kr/pretty v0.3.0 // indirect
 	github.com/labstack/echo/v4 v4.10.2

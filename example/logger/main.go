@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+
 	"github.com/glebnaz/witcher/log"
 	"github.com/sirupsen/logrus"
 )
