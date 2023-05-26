@@ -3,7 +3,6 @@ package trace
 import (
 	"context"
 
-	"github.com/glebnaz/witcher/log"
 	"google.golang.org/grpc"
 )
 
@@ -22,7 +21,6 @@ func ServerSimpleRequestIDUnaryInterceptor() func(ctx context.Context,
 		reqID := GetSimpleReqIDFromContext(ctx)
 		if reqID == "" {
 			reqID = GenerateSimpleReqID()
-			log.Debugf(ctx, "generate new reqId: %s", reqID)
 			ctx = AddSimpleReqIDToContext(ctx, reqID)
 		}
 		return handler(ctx, req)
