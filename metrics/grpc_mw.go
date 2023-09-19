@@ -4,7 +4,13 @@ import (
 	"context"
 	"time"
 
+	"google.golang.org/grpc/status"
+
 	"google.golang.org/grpc"
+)
+
+const (
+	unknownCode = "unknown"
 )
 
 // ServerMetricsUnaryInterceptor
@@ -32,12 +38,13 @@ func ServerMetricsUnaryInterceptor(namespace string) func(ctx context.Context,
 		startTime := time.Now()
 		h, err := handler(ctx, req)
 		tookTime := float64(time.Since(startTime)) / float64(time.Second)
-		serverResponseTime.WithLabelValues(info.FullMethod).Observe(tookTime)
-		if err != nil {
-			serverRequestCounter.WithLabelValues(info.FullMethod, "500").Inc()
-			return h, err
+		hStatus, ok := status.FromError(err)
+		statusString := unknownCode
+		if ok {
+			statusString = hStatus.Code().String()
 		}
-		serverRequestCounter.WithLabelValues(info.FullMethod, "200").Inc()
+		serverResponseTime.WithLabelValues(info.FullMethod).Observe(tookTime)
+		serverRequestCounter.WithLabelValues(info.FullMethod, statusString).Inc()
 		return h, err
 	}
 }

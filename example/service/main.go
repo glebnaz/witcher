@@ -7,18 +7,20 @@ import (
 
 	"github.com/glebnaz/witcher/db/mongo"
 	"github.com/glebnaz/witcher/engine"
-	"github.com/glebnaz/witcher/metrics"
+	"github.com/glebnaz/witcher/grpc"
 	log "github.com/sirupsen/logrus"
-	"google.golang.org/grpc"
 )
 
 func main() {
 	log.SetLevel(log.DebugLevel)
 	log.SetFormatter(&log.TextFormatter{
 		DisableColors: false,
+		ForceColors:   true,
+		DisableQuote:  true,
+		ForceQuote:    false,
 	})
 
-	serverGRPC := grpc.NewServer(grpc.UnaryInterceptor(metrics.ServerMetricsUnaryInterceptor("test")))
+	serverGRPC := grpc.NewDefaultServer("witcher_example")
 	s := engine.NewServer(engine.WithGRPCServer(serverGRPC, ":8082", time.Second*5))
 
 	checker1 := engine.NewDefaultChecker("checker false", func() error {
