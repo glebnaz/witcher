@@ -22,4 +22,5 @@ require (
 	golang.org/x/crypto v0.9.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230526015343-6ee61e4f9d5f // indirect
 	google.golang.org/grpc v1.55.0
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

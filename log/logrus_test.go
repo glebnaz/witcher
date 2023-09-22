@@ -9,6 +9,7 @@ import (
 )
 
 func TestInfof(t *testing.T) {
+	t.Parallel()
 	bufferForCTX := &bytes.Buffer{}
 	withCTXLogger := logrus.New()
 	withCTXLogger.SetOutput(bufferForCTX)
@@ -49,7 +50,9 @@ func TestInfof(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			Infof(tt.args.ctx, tt.args.format, tt.args.args...)
 			if len(tt.buffer.String()) == 0 {
 				t.Errorf("Infof() = %v, want %v", tt.buffer.String(), tt.args.format)
@@ -59,6 +62,7 @@ func TestInfof(t *testing.T) {
 }
 
 func TestInfo(t *testing.T) {
+	t.Parallel()
 	bufferForCTX := &bytes.Buffer{}
 	withCTXLogger := logrus.New()
 	withCTXLogger.SetOutput(bufferForCTX)
@@ -96,7 +100,9 @@ func TestInfo(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			Info(tt.args.ctx, tt.args.args...)
 			if len(tt.buffer.String()) == 0 {
 				t.Errorf("Info() = %v, want %v", tt.buffer.String(), tt.args.args)
@@ -106,6 +112,7 @@ func TestInfo(t *testing.T) {
 }
 
 func TestDebugf(t *testing.T) {
+	t.Parallel()
 	bufferForCTX := &bytes.Buffer{}
 	withCTXLogger := logrus.New()
 	withCTXLogger.SetLevel(logrus.DebugLevel)
@@ -148,7 +155,9 @@ func TestDebugf(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			Debugf(tt.args.ctx, tt.args.format, tt.args.args...)
 			if len(tt.buffer.String()) == 0 {
 				t.Errorf("Debugf() = %v, want %v", tt.buffer.String(), tt.args.format)
@@ -158,6 +167,7 @@ func TestDebugf(t *testing.T) {
 }
 
 func TestDebug(t *testing.T) {
+	t.Parallel()
 	bufferForCTX := &bytes.Buffer{}
 	withCTXLogger := logrus.New()
 	withCTXLogger.SetLevel(logrus.DebugLevel)
@@ -197,7 +207,9 @@ func TestDebug(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			Debug(tt.args.ctx, tt.args.args...)
 			if len(tt.buffer.String()) == 0 {
 				t.Errorf("Debug() = %v, want %v", tt.buffer.String(), tt.args.args)
@@ -207,6 +219,7 @@ func TestDebug(t *testing.T) {
 }
 
 func TestErrorf(t *testing.T) {
+	t.Parallel()
 	bufferForCTX := &bytes.Buffer{}
 	withCTXLogger := logrus.New()
 	withCTXLogger.SetOutput(bufferForCTX)
@@ -247,7 +260,9 @@ func TestErrorf(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			Errorf(tt.args.ctx, tt.args.format, tt.args.args...)
 			if len(tt.buffer.String()) == 0 {
 				t.Errorf("Errorf() = %v, want %v", tt.buffer.String(), tt.args.format)
@@ -257,6 +272,7 @@ func TestErrorf(t *testing.T) {
 }
 
 func TestError(t *testing.T) {
+	t.Parallel()
 	bufferForCTX := &bytes.Buffer{}
 	withCTXLogger := logrus.New()
 	withCTXLogger.SetOutput(bufferForCTX)
@@ -294,7 +310,9 @@ func TestError(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			Error(tt.args.ctx, tt.args.args...)
 			if len(tt.buffer.String()) == 0 {
 				t.Errorf("Error() = %v, want %v", tt.buffer.String(), tt.args.args)
@@ -304,6 +322,7 @@ func TestError(t *testing.T) {
 }
 
 func TestWarnf(t *testing.T) {
+	t.Parallel()
 	bufferForCTX := &bytes.Buffer{}
 	withCTXLogger := logrus.New()
 	withCTXLogger.SetOutput(bufferForCTX)
@@ -344,7 +363,9 @@ func TestWarnf(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			Warnf(tt.args.ctx, tt.args.format, tt.args.args...)
 			if len(tt.buffer.String()) == 0 {
 				t.Errorf("Warnf() = %v, want %v", tt.buffer.String(), tt.args.format)
@@ -354,6 +375,7 @@ func TestWarnf(t *testing.T) {
 }
 
 func TestWarn(t *testing.T) {
+	t.Parallel()
 	bufferForCTX := &bytes.Buffer{}
 	withCTXLogger := logrus.New()
 	withCTXLogger.SetOutput(bufferForCTX)
@@ -391,7 +413,9 @@ func TestWarn(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			Warn(tt.args.ctx, tt.args.args...)
 			if len(tt.buffer.String()) == 0 {
 				t.Errorf("Warn() = %v, want %v", tt.buffer.String(), tt.args.args)
@@ -401,6 +425,7 @@ func TestWarn(t *testing.T) {
 }
 
 func TestTracef(t *testing.T) {
+	t.Parallel()
 	bufferForCTX := &bytes.Buffer{}
 	withCTXLogger := logrus.New()
 	withCTXLogger.SetOutput(bufferForCTX)
@@ -443,7 +468,9 @@ func TestTracef(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			Tracef(tt.args.ctx, tt.args.format, tt.args.args...)
 			if len(tt.buffer.String()) == 0 {
 				t.Errorf("Tracef() = %v, want %v", tt.buffer.String(), tt.args.format)
@@ -453,6 +480,7 @@ func TestTracef(t *testing.T) {
 }
 
 func TestTrace(t *testing.T) {
+	t.Parallel()
 	bufferForCTX := &bytes.Buffer{}
 	withCTXLogger := logrus.New()
 	withCTXLogger.SetOutput(bufferForCTX)
@@ -492,7 +520,9 @@ func TestTrace(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			Trace(tt.args.ctx, tt.args.args...)
 			if len(tt.buffer.String()) == 0 {
 				t.Errorf("Trace() = %v, want %v", tt.buffer.String(), tt.args.args)
