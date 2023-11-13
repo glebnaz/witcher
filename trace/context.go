@@ -2,6 +2,7 @@ package trace
 
 import (
 	"context"
+
 	"github.com/google/uuid"
 	"google.golang.org/grpc/metadata"
 )

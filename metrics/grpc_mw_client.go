@@ -2,9 +2,10 @@ package metrics
 
 import (
 	"context"
+	"time"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/status"
-	"time"
 )
 
 // ClientMetricsUnaryInterceptor returns a new unary client interceptor for

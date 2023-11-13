@@ -2,6 +2,7 @@ package trace
 
 import (
 	"context"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 )
@@ -27,6 +28,7 @@ func ClientBaseUnaryInterceptor(from string) grpc.UnaryClientInterceptor {
 			md, ok := metadata.FromOutgoingContext(ctx)
 			if ok {
 				md = metadata.Join(md, metadata.New(map[string]string{string(simpleReqID): reqID}))
+				ctx = metadata.NewOutgoingContext(ctx, md)
 			} else {
 				ctx = metadata.NewOutgoingContext(ctx, metadata.New(map[string]string{string(simpleReqID): reqID}))
 			}
@@ -35,14 +37,15 @@ func ClientBaseUnaryInterceptor(from string) grpc.UnaryClientInterceptor {
 			md, ok := metadata.FromOutgoingContext(ctx)
 			if ok {
 				md = metadata.Join(md, metadata.New(map[string]string{string(simpleReqID): reqID}))
+				ctx = metadata.NewOutgoingContext(ctx, md)
 			}
 			ctx = metadata.NewOutgoingContext(ctx, metadata.New(map[string]string{string(simpleReqID): reqID}))
 		}
 
 		md, ok := metadata.FromOutgoingContext(ctx)
 		if !ok {
-			md := metadata.New(map[string]string{string(FromKey): from})
-			ctx = metadata.NewOutgoingContext(ctx, md)
+			mdNew := metadata.New(map[string]string{string(FromKey): from})
+			ctx = metadata.NewOutgoingContext(ctx, mdNew)
 		} else {
 			md = metadata.Join(md, metadata.New(map[string]string{string(FromKey): from}))
 			ctx = metadata.NewOutgoingContext(ctx, md)
