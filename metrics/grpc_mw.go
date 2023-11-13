@@ -4,6 +4,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/prometheus/client_golang/prometheus"
+
 	"google.golang.org/grpc/status"
 
 	"google.golang.org/grpc"
@@ -25,14 +27,33 @@ func ServerMetricsUnaryInterceptor(namespace string) func(ctx context.Context,
 	info *grpc.UnaryServerInfo,
 	handler grpc.UnaryHandler) (interface{}, error) {
 
-	var serverRequestCounter = MustRegisterCounterVec("server_grpc_request_count",
-		namespace,
-		"server_request_count", []string{"method", "code"})
+	const nameCounter = "server_grpc_request_count"
+	const nameHistogram = "server_grpc_response_time"
 
-	var serverResponseTime = MustRegisterHistogramVec("server_grpc_response_time",
-		namespace,
-		"server response time in seconds",
-		TimeBucketsMedium, []string{"method"})
+	keyCounter := nameCounter + namespace
+	keyHistogram := nameHistogram + namespace
+
+	var serverRequestCounter *prometheus.CounterVec
+	var serverResponseTime *prometheus.HistogramVec
+
+	if _, ok := metricsCollector[keyCounter]; !ok {
+		serverRequestCounter = MustRegisterCounterVec("server_grpc_request_count",
+			namespace,
+			"server_request_count", []string{"method", "code"})
+		metricsCollector[keyCounter] = serverRequestCounter
+	} else {
+		serverRequestCounter = metricsCollector[keyCounter].(*prometheus.CounterVec)
+	}
+
+	if _, ok := metricsCollector[keyHistogram]; !ok {
+		serverResponseTime = MustRegisterHistogramVec("server_grpc_response_time",
+			namespace,
+			"server response time in seconds",
+			TimeBucketsMedium, []string{"method"})
+		metricsCollector[keyHistogram] = serverResponseTime
+	} else {
+		serverResponseTime = metricsCollector[keyHistogram].(*prometheus.HistogramVec)
+	}
 
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 		startTime := time.Now()
