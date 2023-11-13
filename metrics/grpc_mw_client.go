@@ -19,12 +19,12 @@ import (
 func ClientMetricsUnaryInterceptor(from, to string) grpc.UnaryClientInterceptor {
 	var clientRequestCounter = MustRegisterCounterVec("client_grpc_request_count",
 		from,
-		"client_request_count", []string{"method", "code", from, to})
+		"client_request_count", []string{"method", "code", "from", "to"})
 
 	var clientResponseTime = MustRegisterHistogramVec("client_grpc_response_time",
 		from,
 		"client response time in seconds",
-		TimeBucketsMedium, []string{"method", from, to})
+		TimeBucketsMedium, []string{"method", "from", "to"})
 
 	return func(ctx context.Context,
 		method string,
