@@ -20,8 +20,11 @@ func ServerSimpleRequestIDUnaryInterceptor() func(ctx context.Context,
 		/////////////////////////////////////////////////
 		reqID := GetSimpleReqIDFromContext(ctx)
 		if reqID == "" {
-			reqID = GenerateSimpleReqID()
-			ctx = AddSimpleReqIDToContext(ctx, reqID)
+			reqID, ctx = GetSimpleReqIDFromMetaData(ctx)
+			if reqID == "" {
+				reqID = GenerateSimpleReqID()
+				ctx = AddSimpleReqIDToContext(ctx, reqID)
+			}
 		}
 		return handler(ctx, req)
 	}
