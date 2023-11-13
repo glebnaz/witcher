@@ -18,7 +18,7 @@ func ClientLoggerUnaryInterceptor(from, to string) grpc.UnaryClientInterceptor {
 		opts ...grpc.CallOption) error {
 		/////////////////////////////////////////////////
 
-		Debugf(ctx, "Call %s from %s to %s", method, from, to)
+		Debugf(ctx, "GRPC UNARY REQUEST[%s] from %s to %s", method, from, to)
 
 		return invoker(ctx, method, req, reply, cc, opts...)
 	}
