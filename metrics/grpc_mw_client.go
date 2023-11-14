@@ -17,8 +17,8 @@ var metricsCollector = make(map[string]any)
 // namespace here is a prefix for metrics name
 //
 // For every RPC it exports the following metrics:
-// - client_grpc_request_count{method, code,from,to}
-// - client_grpc_response_time{method,from,to}
+// - client_grpc_request_count{method, code, from, to}
+// - client_grpc_response_time{method, from, to}
 // namespace here is a prefix for metrics name
 func ClientMetricsUnaryInterceptor(from, to string) grpc.UnaryClientInterceptor {
 	const nameCounter = "client_grpc_request_count"
