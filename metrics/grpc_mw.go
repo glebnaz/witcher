@@ -37,7 +37,7 @@ func ServerMetricsUnaryInterceptor(namespace string) func(ctx context.Context,
 	var serverResponseTime *prometheus.HistogramVec
 
 	if _, ok := metricsCollector[keyCounter]; !ok {
-		serverRequestCounter = MustRegisterCounterVec("server_grpc_request_count",
+		serverRequestCounter = MustRegisterCounterVec(nameCounter,
 			namespace,
 			"server_request_count", []string{"method", "code"})
 		metricsCollector[keyCounter] = serverRequestCounter
@@ -46,7 +46,7 @@ func ServerMetricsUnaryInterceptor(namespace string) func(ctx context.Context,
 	}
 
 	if _, ok := metricsCollector[keyHistogram]; !ok {
-		serverResponseTime = MustRegisterHistogramVec("server_grpc_response_time",
+		serverResponseTime = MustRegisterHistogramVec(nameHistogram,
 			namespace,
 			"server response time in seconds",
 			TimeBucketsMedium, []string{"method"})

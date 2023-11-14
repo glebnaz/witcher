@@ -38,8 +38,9 @@ func ClientBaseUnaryInterceptor(from string) grpc.UnaryClientInterceptor {
 			if ok {
 				md = metadata.Join(md, metadata.New(map[string]string{string(simpleReqID): reqID}))
 				ctx = metadata.NewOutgoingContext(ctx, md)
+			} else {
+				ctx = metadata.NewOutgoingContext(ctx, metadata.New(map[string]string{string(simpleReqID): reqID}))
 			}
-			ctx = metadata.NewOutgoingContext(ctx, metadata.New(map[string]string{string(simpleReqID): reqID}))
 		}
 
 		md, ok := metadata.FromOutgoingContext(ctx)

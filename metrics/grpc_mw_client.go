@@ -31,7 +31,7 @@ func ClientMetricsUnaryInterceptor(from, to string) grpc.UnaryClientInterceptor 
 	var clientResponseTime *prometheus.HistogramVec
 
 	if _, ok := metricsCollector[keyCounter]; !ok {
-		clientRequestCounter = MustRegisterCounterVec("client_grpc_request_count",
+		clientRequestCounter = MustRegisterCounterVec(nameCounter,
 			from,
 			"client_request_count", []string{"method", "code", "from", "to"})
 
@@ -41,7 +41,7 @@ func ClientMetricsUnaryInterceptor(from, to string) grpc.UnaryClientInterceptor 
 	}
 
 	if _, ok := metricsCollector[keyHistogram]; !ok {
-		clientResponseTime = MustRegisterHistogramVec("client_grpc_response_time",
+		clientResponseTime = MustRegisterHistogramVec(nameHistogram,
 			from,
 			"client response time in seconds",
 			TimeBucketsMedium, []string{"method", "from", "to"})
