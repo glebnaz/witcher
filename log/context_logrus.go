@@ -9,20 +9,20 @@ import (
 // for fields
 type ctxFieldsKey string
 
-var key = ctxFieldsKey("logrusFields")
+var ctxKeyLogrusFields = ctxFieldsKey("logrusFields")
 
 // for logrus.Entry
-type ctxEntryKey string
+type ctxEntryKeyFields string
 
-var entryKey = ctxEntryKey("logrusEntry")
+var entryKey = ctxEntryKeyFields("logrusEntry")
 
 // AddFieldsToCTX adds fields to ctx
 func AddFieldsToCTX(ctx context.Context, fields logrus.Fields) context.Context {
-	return context.WithValue(ctx, key, fields)
+	return context.WithValue(ctx, ctxKeyLogrusFields, fields)
 }
 
 func GetFieldsFromCTX(ctx context.Context) logrus.Fields {
-	fields, ok := ctx.Value(key).(logrus.Fields)
+	fields, ok := ctx.Value(ctxKeyLogrusFields).(logrus.Fields)
 	if !ok {
 		fields = logrus.Fields{}
 	}
@@ -31,7 +31,7 @@ func GetFieldsFromCTX(ctx context.Context) logrus.Fields {
 
 // NewFromCTX returns a new logrus.Entry with fields from ctx
 func NewFromCTX(ctx context.Context) *logrus.Entry {
-	fields, ok := ctx.Value(key).(logrus.Fields)
+	fields, ok := ctx.Value(ctxKeyLogrusFields).(logrus.Fields)
 	if !ok {
 		fields = logrus.Fields{}
 	}
