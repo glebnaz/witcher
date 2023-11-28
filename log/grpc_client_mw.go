@@ -3,6 +3,8 @@ package log
 import (
 	"context"
 
+	"github.com/rs/zerolog/log"
+
 	"google.golang.org/grpc"
 )
 
@@ -18,7 +20,7 @@ func ClientLoggerUnaryInterceptor(from, to string) grpc.UnaryClientInterceptor {
 		opts ...grpc.CallOption) error {
 		/////////////////////////////////////////////////
 
-		Debugf(ctx, "GRPC UNARY REQUEST[%s] from %s to %s", method, from, to)
+		log.Debug().Ctx(ctx).Msgf("Call %s from %s to %s", method, from, to)
 
 		return invoker(ctx, method, req, reply, cc, opts...)
 	}

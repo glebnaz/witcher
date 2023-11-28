@@ -49,7 +49,7 @@ import (
 	"time"
 
 	"github.com/glebnaz/witcher/engine"
-	log "github.com/sirupsen/logrus"
+	"github.com/rs/zerolog/log"
 )
 
 func main() {

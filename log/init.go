@@ -4,23 +4,61 @@ import (
 	"io"
 	"os"
 
-	formatter "github.com/antonfisher/nested-logrus-formatter"
-	log "github.com/sirupsen/logrus"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
-// InitLog initializes logrus logger
-// It uses nested-logrus-formatter
-// It sets log level from LOGLVL env variable
-// data format: 2006|01|02 15:04:05.000
-func InitLog(out io.Writer) {
-	log.SetFormatter(&formatter.Formatter{
-		HideKeys:        true,
-		TimestampFormat: "2006|01|02 15:04:05.000",
-	})
-	log.SetOutput(out)
-	level, err := log.ParseLevel(os.Getenv("LOGLVL"))
-	if err != nil {
-		level = log.DebugLevel
+const (
+	TimestampFieldNameDefault = "t"
+	MessageFieldNameDefault   = "msg"
+)
+
+// InitLog initializes zerolog for this service
+// you need provide stdout for your log
+// this function will init default logger with default formatter
+// and default hook
+func InitLog(out io.Writer, isProd bool) {
+	if isProd {
+		SetDefaultProductionLogger(out)
+		log.Info().Msg("Inited prod version logger")
+		return
 	}
-	log.SetLevel(level)
+	SetDefaultDevLogger(out)
+	log.Info().Msg("Inited dev version logger")
+	return
+}
+
+func SetDefaultProductionLogger(w io.Writer) {
+	setDefaultLogger(w)
+}
+
+func SetDefaultDevLogger(w io.Writer) {
+	output := zerolog.ConsoleWriter{
+		Out:        w,
+		TimeFormat: "2006|01|02 15:04:05.000",
+		NoColor:    false,
+	}
+
+	setDefaultLogger(output)
+}
+
+func setDefaultLogger(out io.Writer) {
+	zerolog.TimestampFieldName = TimestampFieldNameDefault
+	zerolog.MessageFieldName = MessageFieldNameDefault
+
+	logger := zerolog.New(out).With().Timestamp().Logger()
+
+	log.Logger = logger
+
+	lvl, err := zerolog.ParseLevel(os.Getenv("LOGLVL"))
+	if err != nil || lvl == zerolog.NoLevel {
+		lvl = zerolog.DebugLevel
+	}
+
+	log.Logger = log.Level(lvl)
+
+	//hooks
+	for i := range defaultHooks {
+		log.Logger = log.Hook(defaultHooks[i])
+	}
 }

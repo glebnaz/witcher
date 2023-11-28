@@ -1,17 +1,14 @@
 package main
 
 import (
-	"context"
+	"os"
 
 	"github.com/glebnaz/witcher/log"
-	"github.com/sirupsen/logrus"
+	zlog "github.com/rs/zerolog/log"
 )
 
 func main() {
-	logrus.SetReportCaller(true)
-	entry := logrus.WithFields(logrus.Fields{"id": 1})
-	ctx := log.AddEntryToCTX(context.Background(), entry)
+	log.InitLog(os.Stdout, false)
 
-	log.Infof(ctx, "test with id")
-	log.Infof(context.Background(), "test without id")
+	zlog.Debug().Msg("sds")
 }
