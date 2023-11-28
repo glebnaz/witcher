@@ -46,7 +46,7 @@ func (b *grpcServerRunner) actor() (func() error, func(error)) {
 
 			select {
 			case <-time.After(b.gracefulShutdownTimeout):
-				log.Error().Err(errors.Wrap(context.DeadlineExceeded, "grpc server graceful stop timed out"))
+				log.Error().Err(errors.Wrap(context.DeadlineExceeded, "grpc server graceful stop timed out")).Msg("stop server by timeout")
 				b.server.Stop()
 				log.Info().Msg("grpc server stopped (force)")
 			case <-doneCh:

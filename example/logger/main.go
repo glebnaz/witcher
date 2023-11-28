@@ -8,7 +8,17 @@ import (
 )
 
 func main() {
-	log.InitLog(os.Stdout, false)
+	log.InitLog(os.Stdout, true)
 
-	zlog.Debug().Msg("sds")
+	zlog.Debug().Msg("MSG")
 }
+
+//func main() {
+//	log.InitLog(os.Stdout, true)
+//
+//	zlog.Debug().Msg("MSG")
+//}
+
+//      OUTPUT
+// {"level":"info","t":"2023-11-28T21:32:59+01:00","msg":"Inited prod version logger"}
+// {"level":"debug","t":"2023-11-28T21:32:59+01:00","msg":"MSG"}

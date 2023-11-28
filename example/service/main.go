@@ -47,7 +47,7 @@ func main() {
 		}
 	},
 		func(error) {
-			log.Error().Msgf("Actor failed")
+			log.Error().Msg("Actor failed")
 		})
 
 	m, err := mongo.NewMongo(s.GetCTX(), "mongodb://localhost:27017")
