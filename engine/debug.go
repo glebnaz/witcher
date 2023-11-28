@@ -7,9 +7,8 @@ import (
 	"time"
 
 	"github.com/glebnaz/witcher/metrics"
-
 	"github.com/labstack/echo/v4"
-	log "github.com/sirupsen/logrus"
+	"github.com/rs/zerolog/log"
 )
 
 type DebugServer struct {
@@ -51,14 +50,14 @@ func (d *DebugServer) SetReady(ready bool) {
 	defer d.m.Unlock()
 	d.ready = ready
 	if ready {
-		log.Infof("Server set ready")
+		log.Info().Msg("Server set ready")
 	} else {
-		log.Infof("Server is not ready")
+		log.Info().Msg("Server is not ready")
 	}
 }
 
 func (d *DebugServer) AddChecker(checker Checker) {
-	log.Debugf("Adding checker %s", checker.Name())
+	log.Debug().Msgf("Adding checker %s", checker.Name())
 	d.m.Lock()
 	defer d.m.Unlock()
 	d.checkers = append(d.checkers, checker)
@@ -73,7 +72,7 @@ func (d *DebugServer) AddCheckers(checkers []Checker) {
 
 // Live is probe checker
 func (d *DebugServer) Live(c echo.Context) error {
-	log.Infof("Live check at %s", time.Now())
+	log.Info().Msgf("Live check at %s", time.Now())
 	d.m.Lock()
 	defer d.m.Unlock()
 
@@ -83,7 +82,7 @@ func (d *DebugServer) Live(c echo.Context) error {
 
 	for i := range d.checkers {
 		if err := d.checkers[i].Check(); err != nil {
-			log.Errorf("Server is not live: %s", err)
+			log.Error().Msgf("Server is not live: %s", err)
 			live = false
 			info[d.checkers[i].Name()] = false
 		} else {
@@ -92,7 +91,7 @@ func (d *DebugServer) Live(c echo.Context) error {
 	}
 
 	if !live {
-		log.Errorf("Server is not live")
+		log.Error().Msgf("Server is not live")
 		return c.JSON(http.StatusInternalServerError, info)
 	}
 	return c.JSON(http.StatusOK, info)
@@ -100,7 +99,7 @@ func (d *DebugServer) Live(c echo.Context) error {
 
 // Ready is probe checker
 func (d *DebugServer) Ready(c echo.Context) error {
-	log.Infof("Ready check at %s", time.Now())
+	log.Info().Msgf("Ready check at %s", time.Now())
 	if d.ready {
 		return c.String(http.StatusOK, "OK")
 	}
@@ -108,16 +107,16 @@ func (d *DebugServer) Ready(c echo.Context) error {
 }
 
 func (d *DebugServer) RunDebug() error {
-	log.Infof("Run debug server at %s", time.Now())
+	log.Info().Msgf("Run debug server at %s", time.Now())
 	return d.engine.Start(d.PORT)
 }
 
 func (d *DebugServer) ShutdownDebug(ctx context.Context) error {
-	log.Infof("Start shutdown debug server at %s", time.Now())
+	log.Info().Msgf("Start shutdown debug server at %s", time.Now())
 	errShutDown := d.engine.Shutdown(ctx)
 	if errShutDown != nil {
 		return errShutDown
 	}
-	log.Debugf("Shutdown debug server success")
+	log.Debug().Msg("Shutdown debug server success")
 	return nil
 }
