@@ -1,6 +1,6 @@
 package engine
 
-import log "github.com/sirupsen/logrus"
+import "github.com/rs/zerolog/log"
 
 const (
 	banner = `
@@ -38,13 +38,12 @@ const (
 ===================================================================⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 `
 
-	introduce = `Server is running! Your Debug Port is: %s`
+	introduce = `Никак вы, бл@ть, не научитесь! Your Debug Port is: %s`
 )
 
 func (s *Server) introduce() {
-	log.Infof("Server Is Ready")
-	log.Infof(introduce, s.PORT)
+	log.Info().Msgf(introduce, s.PORT)
 	if !s.disableBanner {
-		log.Infof(banner)
+		log.Info().Msg(banner)
 	}
 }

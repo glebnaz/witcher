@@ -1,17 +1,24 @@
 package main
 
 import (
-	"context"
+	"os"
 
 	"github.com/glebnaz/witcher/log"
-	"github.com/sirupsen/logrus"
+	zlog "github.com/rs/zerolog/log"
 )
 
 func main() {
-	logrus.SetReportCaller(true)
-	entry := logrus.WithFields(logrus.Fields{"id": 1})
-	ctx := log.AddEntryToCTX(context.Background(), entry)
+	log.InitLog(os.Stdout, true)
 
-	log.Infof(ctx, "test with id")
-	log.Infof(context.Background(), "test without id")
+	zlog.Debug().Msg("MSG")
 }
+
+//func main() {
+//	log.InitLog(os.Stdout, true)
+//
+//	zlog.Debug().Msg("MSG")
+//}
+
+//      OUTPUT
+// {"level":"info","t":"2023-11-28T21:32:59+01:00","msg":"Inited prod version logger"}
+// {"level":"debug","t":"2023-11-28T21:32:59+01:00","msg":"MSG"}

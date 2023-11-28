@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/glebnaz/witcher/engine"
-	log "github.com/sirupsen/logrus"
+	"github.com/rs/zerolog/log"
 
 	driver "go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -40,7 +40,7 @@ func (m *Mongo) Closer() engine.Closer {
 		defer group.Done()
 		err := m.Disconnect(ctx)
 		if err != nil {
-			log.Debugf("Error disconnect mongo: %s", err)
+			log.Debug().Msgf("Error disconnect mongo: %s", err)
 			return err
 		}
 		return nil

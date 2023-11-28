@@ -14,7 +14,7 @@ import (
 
 	"github.com/kelseyhightower/envconfig"
 	"github.com/oklog/run"
-	log "github.com/sirupsen/logrus"
+	"github.com/rs/zerolog/log"
 )
 
 type engineCfg struct {
@@ -84,7 +84,7 @@ type Server struct {
 
 // Run start your server
 func (s *Server) Run() error {
-	log.Infof("Starting ...")
+	log.Info().Msgf("Starting ...")
 
 	//add debug server
 	s.AddActor(func() error {
@@ -95,7 +95,7 @@ func (s *Server) Run() error {
 		return nil
 	}, func(err error) {
 		if err != nil {
-			log.Fatalf("Error Run Debug Server: %s", err)
+			log.Fatal().Msgf("Error Run Debug Server: %s", err)
 		}
 	})
 
@@ -117,13 +117,13 @@ func (s *Server) Run() error {
 	<-quit
 
 	//start shutdown
-	log.Infof("Start shutdown server")
+	log.Info().Msgf("Start shutdown server")
 	err := s.Shutdown()
 	if err != nil {
-		log.Errorf("Error Shutdown Server: %s", err)
+		log.Error().Msgf("Error Shutdown Server: %s", err)
 		return err
 	}
-	log.Infof("Shutdown server gracefully")
+	log.Info().Msgf("Shutdown server gracefully")
 	return nil
 }
 
@@ -143,7 +143,7 @@ func (s *Server) runRunGroup() {
 	go func() {
 		err := s.runGroup.Run()
 		if err != nil {
-			log.Errorf("Error runGroup Server: %s", err)
+			log.Error().Msgf("Error runGroup Server: %s", err)
 			s.setErrRunGroup(err)
 		}
 	}()
@@ -160,7 +160,7 @@ func (s *Server) runRunGroup() {
 func (s *Server) AddActor(execute func() error, interrupt func(err error)) {
 	s.m.Lock()
 	defer s.m.Unlock()
-	log.Debugf("Add New Actor")
+	log.Debug().Msgf("Add New Actor")
 	s.runGroup.Add(execute, interrupt)
 }
 
@@ -169,7 +169,7 @@ func (s *Server) AddActor(execute func() error, interrupt func(err error)) {
 func (s *Server) AddCloser(closer Closer) {
 	s.m.Lock()
 	defer s.m.Unlock()
-	log.Debugf("AddCloser %s", closer.GetName())
+	log.Debug().Msgf("AddCloser %s", closer.GetName())
 	s.closerGroup = append(s.closerGroup, closer)
 }
 
@@ -187,7 +187,7 @@ func (s *Server) AddClosers(closers []Closer) {
 func (s *Server) Shutdown() error {
 	s.m.Lock()
 	defer s.m.Unlock()
-	log.Debugf("Shutdown with timeout - %s", s.shutdownTimeout.String())
+	log.Debug().Msgf("Shutdown with timeout - %s", s.shutdownTimeout.String())
 	s.SetReady(false)
 	ctx, cancel := context.WithTimeout(context.Background(), s.shutdownTimeout)
 	defer cancel()
@@ -196,7 +196,7 @@ func (s *Server) Shutdown() error {
 
 	err := s.ShutdownDebug(ctx)
 	if err != nil {
-		log.Errorf("Error Shutdown Debug Server: %s", err)
+		log.Error().Msgf("Error Shutdown Debug Server: %s", err)
 	}
 
 	quit := make(chan struct{})
@@ -204,7 +204,7 @@ func (s *Server) Shutdown() error {
 		err = s.closeClosers(ctx)
 		if err != nil {
 			quit <- struct{}{}
-			log.Errorf("Error Close Closers: %s", err)
+			log.Error().Msgf("Error Close Closers: %s", err)
 			return
 		}
 		quit <- struct{}{}
@@ -215,7 +215,7 @@ func (s *Server) Shutdown() error {
 		case <-quit:
 			return err
 		case <-ctx.Done():
-			log.Debugf("force shutdown")
+			log.Debug().Msgf("force shutdown")
 			return errors.New("force quit")
 		}
 	}
@@ -225,13 +225,13 @@ func (s *Server) closeClosers(ctx context.Context) error {
 	var wg sync.WaitGroup
 	var errMsg []string
 	for _, closer := range s.closerGroup {
-		log.Debugf("Close closer: %s", closer.GetName())
+		log.Debug().Msgf("Close closer: %s", closer.GetName())
 		wg.Add(1)
 		go func(c Closer) {
 			err := c.Close(ctx, &wg)
 			if err != nil {
 				errMsg = append(errMsg, fmt.Sprintf("Error Close Closer %s: %s", c.GetName(), err))
-				log.Errorf("Error Close Closer %s: %s", c.GetName(), err)
+				log.Error().Msgf("Error Close Closer %s: %s", c.GetName(), err)
 			}
 		}(closer)
 	}
@@ -239,7 +239,7 @@ func (s *Server) closeClosers(ctx context.Context) error {
 	if len(errMsg) > 0 {
 		return errors.New(strings.Join(errMsg, "\n"))
 	}
-	log.Debug("Close all closers gracefully")
+	log.Debug().Msg("Close all closers gracefully")
 	return nil
 }
 
@@ -261,7 +261,7 @@ func NewServer(opt ...ServerOpt) *Server {
 
 	err := envconfig.Process("", &cfg)
 	if err != nil {
-		log.Errorf("err read engine config: %s", err)
+		log.Error().Msgf("err read engine config: %s", err)
 		panic(err)
 	}
 

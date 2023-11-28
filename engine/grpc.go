@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
+	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 )
 
@@ -30,11 +30,11 @@ func (b *grpcServerRunner) actor() (func() error, func(error)) {
 			if err != nil {
 				return errors.Wrap(err, "grpc listener init failure")
 			}
-			log.Infof("grpc server: started on %s port", b.port)
+			log.Info().Msgf("grpc server: started on %s port", b.port)
 
 			err = errors.Wrap(b.server.Serve(listener), "grpc server")
 			if err != nil {
-				log.Errorf("grpc serve error: %s", err)
+				log.Error().Msgf("grpc serve error: %s", err)
 			}
 			return err
 		}, func(err error) {
@@ -46,11 +46,11 @@ func (b *grpcServerRunner) actor() (func() error, func(error)) {
 
 			select {
 			case <-time.After(b.gracefulShutdownTimeout):
-				log.Error(errors.Wrap(context.DeadlineExceeded, "grpc server graceful stop timed out"))
+				log.Error().Err(errors.Wrap(context.DeadlineExceeded, "grpc server graceful stop timed out")).Msg("stop server by timeout")
 				b.server.Stop()
-				log.Info("grpc server stopped (force)")
+				log.Info().Msg("grpc server stopped (force)")
 			case <-doneCh:
-				log.Info("grpc server: gracefully stopped")
+				log.Info().Msg("grpc server: gracefully stopped")
 			}
 		}
 }
