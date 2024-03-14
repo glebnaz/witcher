@@ -148,12 +148,13 @@ func (s *Server) runRunGroup() {
 		}
 	}()
 
-	s.AddChecker(NewDefaultChecker("run group", func() error {
+	s.AddChecker(NewDefaultChecker("run group", func(_ context.Context) error {
 		return s.getErrRunGroup()
 	}))
 }
 
 // AddActor add actor control you background task
+//
 // you have execute function and done function(interrupt function)
 // interrupt function handle the error
 // execute function is called when server is ready
@@ -227,13 +228,14 @@ func (s *Server) closeClosers(ctx context.Context) error {
 	for _, closer := range s.closerGroup {
 		log.Debug().Msgf("Close closer: %s", closer.GetName())
 		wg.Add(1)
-		go func(c Closer) {
-			err := c.Close(ctx, &wg)
+		go func(c Closer, wg *sync.WaitGroup) {
+			defer wg.Done()
+			err := c.Close(ctx)
 			if err != nil {
 				errMsg = append(errMsg, fmt.Sprintf("Error Close Closer %s: %s", c.GetName(), err))
 				log.Error().Msgf("Error Close Closer %s: %s", c.GetName(), err)
 			}
-		}(closer)
+		}(closer, &wg)
 	}
 	wg.Wait()
 	if len(errMsg) > 0 {
