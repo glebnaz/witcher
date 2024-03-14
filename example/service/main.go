@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"os"
-	"sync"
 	"time"
 
 	"github.com/glebnaz/witcher/db/mongo"
@@ -18,21 +17,20 @@ func main() {
 	serverGRPC := grpc.NewDefaultServer("witcher_example")
 	s := engine.NewServer(engine.WithGRPCServer(serverGRPC, ":8082", time.Second*5))
 
-	checker1 := engine.NewDefaultChecker("checker false", func() error {
+	checker1 := engine.NewDefaultChecker("checker false", func(ctx context.Context) error {
 		log.Info().Msgf("Checker1 is running")
 		return nil
 	})
 
-	checker2 := engine.NewDefaultChecker("checker true", func() error {
+	checker2 := engine.NewDefaultChecker("checker true", func(ctx context.Context) error {
 		log.Info().Msgf("Checker2 is running")
 		return nil
 	})
 
-	closer := engine.NewDefaultCloser("closer", func(ctx context.Context, wg *sync.WaitGroup) error {
+	closer := engine.NewDefaultCloser("closer", func(ctx context.Context) error {
 		log.Info().Msgf("Closer is running")
 		time.Sleep(time.Second * 10)
 		log.Info().Msgf("Closer is running after 10 seconds")
-		wg.Done()
 		return nil
 	})
 

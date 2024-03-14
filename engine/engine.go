@@ -10,11 +10,10 @@ import (
 	"sync"
 	"time"
 
-	"google.golang.org/grpc"
-
 	"github.com/kelseyhightower/envconfig"
 	"github.com/oklog/run"
 	"github.com/rs/zerolog/log"
+	"google.golang.org/grpc"
 )
 
 type engineCfg struct {
@@ -33,7 +32,7 @@ func WithDisableBanner() ServerOpt {
 
 // WithShutdownTimeout set shutdown timeout
 //
-// timeout is duration for graceful shutdown
+//	is duration for graceful shutdown
 func WithShutdownTimeout(timeout time.Duration) ServerOpt {
 	return func(s *Server) {
 		s.shutdownTimeout = timeout
@@ -148,13 +147,14 @@ func (s *Server) runRunGroup() {
 		}
 	}()
 
-	s.AddChecker(NewDefaultChecker("run group", func() error {
+	s.AddChecker(NewDefaultChecker("run group", func(_ context.Context) error {
 		return s.getErrRunGroup()
 	}))
 }
 
 // AddActor add actor control you background task
-// you have execute function and done function(interrupt function)
+//
+// you have executed function and done function(interrupt function)
 // interrupt function handle the error
 // execute function is called when server is ready
 func (s *Server) AddActor(execute func() error, interrupt func(err error)) {
@@ -221,23 +221,37 @@ func (s *Server) Shutdown() error {
 	}
 }
 
+type ErrorCloser struct {
+	data map[string]error
+}
+
+func (e *ErrorCloser) Error() string {
+	var err []string
+	for k, v := range e.data {
+		err = append(err, fmt.Sprintf("Error Close %s: %s", k, v))
+	}
+	return strings.Join(err, "\n")
+}
+
 func (s *Server) closeClosers(ctx context.Context) error {
 	var wg sync.WaitGroup
-	var errMsg []string
+	errCloser := ErrorCloser{data: make(map[string]error)}
+
 	for _, closer := range s.closerGroup {
 		log.Debug().Msgf("Close closer: %s", closer.GetName())
 		wg.Add(1)
-		go func(c Closer) {
-			err := c.Close(ctx, &wg)
+		go func(c Closer, wg *sync.WaitGroup) {
+			defer wg.Done()
+			err := c.Close(ctx)
 			if err != nil {
-				errMsg = append(errMsg, fmt.Sprintf("Error Close Closer %s: %s", c.GetName(), err))
+				errCloser.data[c.GetName()] = err
 				log.Error().Msgf("Error Close Closer %s: %s", c.GetName(), err)
 			}
-		}(closer)
+		}(closer, &wg)
 	}
 	wg.Wait()
-	if len(errMsg) > 0 {
-		return errors.New(strings.Join(errMsg, "\n"))
+	if len(errCloser.data) > 0 {
+		return &errCloser
 	}
 	log.Debug().Msg("Close all closers gracefully")
 	return nil
