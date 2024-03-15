@@ -14,12 +14,14 @@ import (
 // TestDebugServer tests the DebugServer
 //
 // will check the all k8s probes
+// nolint:paralleltest
 func TestDebugServer(t *testing.T) {
 	t.Log("Testing DEBUG server")
 
 	type fields struct {
 		e        *Server
 		waitTime *time.Duration
+		ctx      context.Context
 	}
 
 	type ProbeResult struct {
@@ -51,8 +53,11 @@ func TestDebugServer(t *testing.T) {
 			fields: func() fields {
 				e := NewServer()
 
+				ctx := context.Background()
+
 				return fields{
-					e: e,
+					e:   e,
+					ctx: ctx,
 				}
 			},
 			want: want{
@@ -89,9 +94,12 @@ func TestDebugServer(t *testing.T) {
 
 				time := 1 * time.Second
 
+				ctx := context.Background()
+
 				return fields{
 					e:        e,
 					waitTime: &time,
+					ctx:      ctx,
 				}
 			},
 			want: want{
@@ -118,6 +126,7 @@ func TestDebugServer(t *testing.T) {
 		},
 	}
 
+	// nolint:paralleltest
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			f := tt.fields()
@@ -127,7 +136,10 @@ func TestDebugServer(t *testing.T) {
 				tt.want.RunErrorFunc(t, err)
 			}()
 
-			defer e.Shutdown()
+			defer func() {
+				errShutdown := e.Shutdown()
+				assert.NoError(t, errShutdown)
+			}()
 
 			// wait for the server to start
 			if f.waitTime != nil {
@@ -135,7 +147,7 @@ func TestDebugServer(t *testing.T) {
 			}
 
 			// check the ready probe
-			resp, err := http.Get("http://localhost:8084/read")
+			resp, err := makeRequest(f.ctx, "http://localhost:8084/read")
 			tt.want.Ready.CallError(t, err)
 			if tt.want.Ready.Body != nil {
 				bodyByte, err := io.ReadAll(resp.Body)
@@ -148,7 +160,7 @@ func TestDebugServer(t *testing.T) {
 			}
 
 			// check the live probe
-			resp, err = http.Get("http://localhost:8084/live")
+			resp, err = makeRequest(f.ctx, "http://localhost:8084/live")
 			tt.want.Live.CallerError(t, err)
 			if tt.want.Live.Body != "" {
 				bodyByte, err := io.ReadAll(resp.Body)
@@ -158,7 +170,7 @@ func TestDebugServer(t *testing.T) {
 			}
 
 			// check the startup probe
-			resp, err = http.Get("http://localhost:8084/startup")
+			resp, err = makeRequest(f.ctx, "http://localhost:8084/startup")
 			tt.want.StartUp.CallerError(t, err)
 			if tt.want.StartUp.Body != "" {
 				bodyByte, err := io.ReadAll(resp.Body)
@@ -169,4 +181,16 @@ func TestDebugServer(t *testing.T) {
 
 		})
 	}
+}
+
+func makeRequest(ctx context.Context, url string) (*http.Response, error) {
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
 }
