@@ -10,11 +10,10 @@ import (
 	"sync"
 	"time"
 
-	"google.golang.org/grpc"
-
 	"github.com/kelseyhightower/envconfig"
 	"github.com/oklog/run"
 	"github.com/rs/zerolog/log"
+	"google.golang.org/grpc"
 )
 
 type engineCfg struct {
@@ -33,7 +32,7 @@ func WithDisableBanner() ServerOpt {
 
 // WithShutdownTimeout set shutdown timeout
 //
-// timeout is duration for graceful shutdown
+//	is duration for graceful shutdown
 func WithShutdownTimeout(timeout time.Duration) ServerOpt {
 	return func(s *Server) {
 		s.shutdownTimeout = timeout
@@ -155,7 +154,7 @@ func (s *Server) runRunGroup() {
 
 // AddActor add actor control you background task
 //
-// you have execute function and done function(interrupt function)
+// you have executed function and done function(interrupt function)
 // interrupt function handle the error
 // execute function is called when server is ready
 func (s *Server) AddActor(execute func() error, interrupt func(err error)) {
