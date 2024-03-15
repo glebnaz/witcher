@@ -150,6 +150,7 @@ func (d *DebugServer) StartupProbeHandler(w http.ResponseWriter, _ *http.Request
 }
 
 func (d *DebugServer) RunDebug() error {
+	d.server.Addr = d.PORT
 	log.Info().Msgf("Run debug server at %s", time.Now())
 	return d.server.ListenAndServe()
 }

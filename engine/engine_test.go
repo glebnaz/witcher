@@ -51,7 +51,7 @@ func TestDebugServer(t *testing.T) {
 		{
 			name: "Simple Positive Test(With out checker)",
 			fields: func() fields {
-				e := NewServer()
+				e := NewServer(WithDebugPort(":1111"))
 
 				ctx := context.Background()
 
@@ -84,7 +84,7 @@ func TestDebugServer(t *testing.T) {
 		{
 			name: "Simple Positive Test(With checker)",
 			fields: func() fields {
-				e := NewServer()
+				e := NewServer(WithDebugPort(":1111"))
 
 				checker := NewDefaultChecker("checker true", func(ctx context.Context) error {
 					return nil
@@ -147,7 +147,7 @@ func TestDebugServer(t *testing.T) {
 			}
 
 			// check the ready probe
-			resp, err := makeRequest(f.ctx, "http://localhost:8084/read")
+			resp, err := makeRequest(f.ctx, "http://localhost:1111/read")
 			tt.want.Ready.CallError(t, err)
 			if tt.want.Ready.Body != nil {
 				bodyByte, err := io.ReadAll(resp.Body)
@@ -160,7 +160,7 @@ func TestDebugServer(t *testing.T) {
 			}
 
 			// check the live probe
-			resp, err = makeRequest(f.ctx, "http://localhost:8084/live")
+			resp, err = makeRequest(f.ctx, "http://localhost:1111/live")
 			tt.want.Live.CallerError(t, err)
 			if tt.want.Live.Body != "" {
 				bodyByte, err := io.ReadAll(resp.Body)
@@ -170,7 +170,7 @@ func TestDebugServer(t *testing.T) {
 			}
 
 			// check the startup probe
-			resp, err = makeRequest(f.ctx, "http://localhost:8084/startup")
+			resp, err = makeRequest(f.ctx, "http://localhost:1111/startup")
 			tt.want.StartUp.CallerError(t, err)
 			if tt.want.StartUp.Body != "" {
 				bodyByte, err := io.ReadAll(resp.Body)
