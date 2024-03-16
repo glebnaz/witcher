@@ -3,8 +3,10 @@ package engine
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"testing"
 	"time"
 
@@ -236,4 +238,73 @@ func makeRequest(ctx context.Context, url string) (*http.Response, error) {
 		return nil, err
 	}
 	return resp, nil
+}
+
+const (
+	liveHandlerPostfix = "/live"
+	host               = "http://localhost"
+)
+
+func TestWithDebugPort(t *testing.T) {
+	t.Parallel()
+	//get random int from 1000 to 9999
+	port := 1000 + time.Now().Nanosecond()%9000
+	portString := fmt.Sprintf(":%d", port)
+	s := NewServer(WithDebugPort(portString))
+	assert.Equal(t, portString, s.DebugServer.PORT)
+
+	go func() {
+		err := s.Run()
+		assert.NoError(t, err)
+	}()
+
+	time.Sleep(5 * time.Millisecond)
+
+	resp, err := makeRequest(context.Background(), host+portString+liveHandlerPostfix)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+}
+
+func TestDebugPortFromEnv(t *testing.T) {
+	t.Parallel()
+	time.Sleep(5 * time.Millisecond)
+	port := 1000 + time.Now().Nanosecond()%9000
+	portString := fmt.Sprintf(":%d", port)
+
+	//set env
+	err := os.Setenv("DEBUG_PORT", portString)
+	assert.NoError(t, err)
+	s := NewServer()
+	go func() {
+		err := s.Run()
+		assert.NoError(t, err)
+	}()
+
+	time.Sleep(5 * time.Millisecond)
+
+	resp, err := makeRequest(context.Background(), host+portString+liveHandlerPostfix)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+}
+
+func TestServer_AddCloser(t *testing.T) {
+	t.Parallel()
+	s := NewServer()
+	closer := NewDefaultCloser("closer", func(ctx context.Context) error {
+		return nil
+	})
+	s.AddCloser(closer)
+	assert.Equal(t, 1, len(s.closerGroup))
+	assert.Equal(t, "closer", s.closerGroup[0].GetName())
+}
+
+func TestServer_AddChecker(t *testing.T) {
+	t.Parallel()
+	s := NewServer()
+	checker := NewDefaultChecker("checker", func(ctx context.Context) error {
+		return nil
+	})
+	s.AddChecker(checker)
+	assert.Equal(t, 1, len(s.checkersGroup))
+	assert.Equal(t, "checker", s.checkersGroup[0].GetName())
 }

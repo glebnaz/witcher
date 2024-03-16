@@ -19,8 +19,8 @@ type DebugServer struct {
 
 	m sync.RWMutex
 
-	ready    bool
-	checkers []Checker
+	ready         bool
+	checkersGroup []Checker
 }
 
 var readHeaderTimeout = 2 * time.Minute
@@ -31,9 +31,9 @@ var readHeaderTimeout = 2 * time.Minute
 // use value with `:` for example: :8084
 func NewDebugServer(port string) *DebugServer {
 	debug := &DebugServer{
-		PORT:     port,
-		ready:    false,
-		checkers: make([]Checker, 0, 10),
+		PORT:          port,
+		ready:         false,
+		checkersGroup: make([]Checker, 0, 10),
 	}
 
 	mux := http.NewServeMux()
@@ -69,10 +69,10 @@ func (d *DebugServer) SetReady(ready bool) {
 }
 
 func (d *DebugServer) AddChecker(checker Checker) {
-	log.Debug().Msgf("Adding checker %s", checker.Name())
+	log.Debug().Msgf("Adding checker %s", checker.GetName())
 	d.m.Lock()
 	defer d.m.Unlock()
-	d.checkers = append(d.checkers, checker)
+	d.checkersGroup = append(d.checkersGroup, checker)
 }
 
 // AddCheckers for check your server is live
@@ -84,10 +84,10 @@ func (d *DebugServer) AddCheckers(checkers []Checker) {
 
 // ReadinessProbeHandler is probe checker for k8s readiness probe
 //
-// It will check all checkers and return 200 if all checkers is ok
+// It will check all checkersGroup and return 200 if all checkersGroup is ok
 // or 500 if one of them is not ok
 //
-// response will be json with all checkers and their status
+// response will be json with all checkersGroup and their status
 func (d *DebugServer) ReadinessProbeHandler(w http.ResponseWriter, req *http.Request) {
 	log.Info().Msgf("readiness probe at %s", time.Now())
 	d.m.RLock()
@@ -97,13 +97,13 @@ func (d *DebugServer) ReadinessProbeHandler(w http.ResponseWriter, req *http.Req
 
 	live := true
 
-	for i := range d.checkers {
-		if err := d.checkers[i].Check(req.Context()); err != nil {
+	for i := range d.checkersGroup {
+		if err := d.checkersGroup[i].Check(req.Context()); err != nil {
 			log.Error().Msgf("Server is not ready to receive traffic: %s", err)
 			live = false
-			info[d.checkers[i].Name()] = false
+			info[d.checkersGroup[i].GetName()] = false
 		} else {
-			info[d.checkers[i].Name()] = true
+			info[d.checkersGroup[i].GetName()] = true
 		}
 	}
 

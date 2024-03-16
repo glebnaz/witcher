@@ -4,7 +4,7 @@ import "context"
 
 type Checker interface {
 	Check(ctx context.Context) error
-	Name() string
+	GetName() string
 }
 
 // DefaultChecker is a default implementation of Checker
@@ -19,7 +19,7 @@ func (c *DefaultChecker) Check(ctx context.Context) error {
 	return c.CheckFunc(ctx)
 }
 
-func (c *DefaultChecker) Name() string {
+func (c *DefaultChecker) GetName() string {
 	return c.NameCheck
 }
 
