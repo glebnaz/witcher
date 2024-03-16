@@ -198,7 +198,7 @@ func TestDebugServer(t *testing.T) {
 			}
 
 			// check the ready probe
-			resp, err := makeRequest(f.ctx, "http://localhost"+tt.Port+"/read")
+			resp, err := makeRequest(f.ctx, host+tt.Port+"/read")
 			tt.want.Ready.CallError(t, err)
 			if tt.want.Ready.Body != nil {
 				bodyByte, err := io.ReadAll(resp.Body)
@@ -211,7 +211,7 @@ func TestDebugServer(t *testing.T) {
 			}
 
 			// check the live probe
-			resp, err = makeRequest(f.ctx, "http://localhost"+tt.Port+"/live")
+			resp, err = makeRequest(f.ctx, host+tt.Port+"/live")
 			tt.want.Live.CallerError(t, err)
 			if tt.want.Live.Body != "" {
 				bodyByte, err := io.ReadAll(resp.Body)
@@ -221,7 +221,7 @@ func TestDebugServer(t *testing.T) {
 			}
 
 			// check the startup probe
-			resp, err = makeRequest(f.ctx, "http://localhost"+tt.Port+"/startup")
+			resp, err = makeRequest(f.ctx, host+tt.Port+"/startup")
 			tt.want.StartUp.CallerError(t, err)
 			if tt.want.StartUp.Body != "" {
 				bodyByte, err := io.ReadAll(resp.Body)
@@ -263,10 +263,10 @@ var pContainer = portContainer{
 func getUniquePort() string {
 	pContainer.m.Lock()
 	last := pContainer.last
-	new := last + 1
-	pContainer.last = new
+	newPort := last + 1
+	pContainer.last = newPort
 	pContainer.m.Unlock()
-	return fmt.Sprintf(":%d", new)
+	return fmt.Sprintf(":%d", newPort)
 }
 
 func TestWithDebugPort(t *testing.T) {
