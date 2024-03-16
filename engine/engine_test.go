@@ -393,6 +393,7 @@ func TestPProfHandlers(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+			//nolint:noctx
 			req, err := http.NewRequest("GET", tt.path, nil)
 			if err != nil {
 				t.Fatal(err)
