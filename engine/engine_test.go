@@ -124,6 +124,49 @@ func TestDebugServer(t *testing.T) {
 				RunErrorFunc: assert.NoError,
 			},
 		},
+		{
+			name: "Simple Negative Test(With checker)",
+			fields: func() fields {
+				e := NewServer(WithDebugPort(":1111"))
+
+				checker := NewDefaultChecker("checker false", func(ctx context.Context) error {
+					return assert.AnError
+				})
+
+				e.AddCheckers([]Checker{checker})
+
+				time := 1 * time.Second
+
+				ctx := context.Background()
+
+				return fields{
+					e:        e,
+					waitTime: &time,
+					ctx:      ctx,
+				}
+			},
+			want: want{
+				Ready: ReadyProbeResult{
+					StatusCode: http.StatusInternalServerError,
+					Body: map[string]bool{
+						"run group":     true,
+						"checker false": false,
+					},
+					CallError: assert.NoError,
+				},
+				Live: ProbeResult{
+					StatusCode:  http.StatusOK,
+					Body:        "OK",
+					CallerError: assert.NoError,
+				},
+				StartUp: ProbeResult{
+					StatusCode:  http.StatusOK,
+					Body:        "OK",
+					CallerError: assert.NoError,
+				},
+				RunErrorFunc: assert.NoError,
+			},
+		},
 	}
 
 	// nolint:paralleltest
@@ -136,10 +179,10 @@ func TestDebugServer(t *testing.T) {
 				tt.want.RunErrorFunc(t, err)
 			}()
 
-			defer func() {
+			t.Cleanup(func() {
 				errShutdown := e.Shutdown()
 				assert.NoError(t, errShutdown)
-			}()
+			})
 
 			// wait for the server to start
 			if f.waitTime != nil {

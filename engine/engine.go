@@ -221,9 +221,22 @@ func (s *Server) Shutdown() error {
 	}
 }
 
+type ErrorCloser struct {
+	data map[string]error
+}
+
+func (e *ErrorCloser) Error() string {
+	var err []string
+	for k, v := range e.data {
+		err = append(err, fmt.Sprintf("Error Close %s: %s", k, v))
+	}
+	return strings.Join(err, "\n")
+}
+
 func (s *Server) closeClosers(ctx context.Context) error {
 	var wg sync.WaitGroup
-	var errMsg []string
+	errCloser := ErrorCloser{data: make(map[string]error)}
+
 	for _, closer := range s.closerGroup {
 		log.Debug().Msgf("Close closer: %s", closer.GetName())
 		wg.Add(1)
@@ -231,14 +244,14 @@ func (s *Server) closeClosers(ctx context.Context) error {
 			defer wg.Done()
 			err := c.Close(ctx)
 			if err != nil {
-				errMsg = append(errMsg, fmt.Sprintf("Error Close Closer %s: %s", c.GetName(), err))
+				errCloser.data[c.GetName()] = err
 				log.Error().Msgf("Error Close Closer %s: %s", c.GetName(), err)
 			}
 		}(closer, &wg)
 	}
 	wg.Wait()
-	if len(errMsg) > 0 {
-		return errors.New(strings.Join(errMsg, "\n"))
+	if len(errCloser.data) > 0 {
+		return &errCloser
 	}
 	log.Debug().Msg("Close all closers gracefully")
 	return nil
