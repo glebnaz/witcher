@@ -257,7 +257,7 @@ type portContainer struct {
 }
 
 var pContainer = portContainer{
-	last: 1111, // use this values because gh actions restricts the port range
+	last: 3500, // use this values because gh actions restricts the port range
 }
 
 func getUniquePort() string {
