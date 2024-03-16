@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/http/httptest"
 	"os"
 	"sync"
 	"testing"
@@ -364,4 +365,43 @@ func TestServer_RunGroup(t *testing.T) {
 	}
 
 	assert.Equal(t, 10, len(value))
+}
+
+func TestPProfHandlers(t *testing.T) {
+	t.Parallel()
+	mux := http.NewServeMux()
+	wrapPProf(mux)
+
+	tests := []struct {
+		name string
+		path string
+	}{
+		{"Index", "/debug/pprof/"},
+		{"Heap", "/debug/pprof/heap"},
+		{"Goroutine", "/debug/pprof/goroutine"},
+		{"Block", "/debug/pprof/block"},
+		{"ThreadCreate", "/debug/pprof/threadcreate"},
+		{"Cmdline", "/debug/pprof/cmdline"},
+		{"Profile", "/debug/pprof/profile"},
+		{"Symbol", "/debug/pprof/symbol"},
+		{"Trace", "/debug/pprof/trace"},
+		{"Mutex", "/debug/pprof/mutex"},
+		{"Allocs", "/debug/pprof/allocs"},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			req, err := http.NewRequest("GET", tt.path, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			rr := httptest.NewRecorder()
+			mux.ServeHTTP(rr, req)
+
+			assert.Equal(t, http.StatusOK, rr.Code)
+		})
+	}
 }
