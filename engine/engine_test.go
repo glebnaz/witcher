@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"sync"
 	"testing"
 	"time"
 
@@ -16,8 +17,8 @@ import (
 // TestDebugServer tests the DebugServer
 //
 // will check the all k8s probes
-// nolint:paralleltest
 func TestDebugServer(t *testing.T) {
+	t.Parallel()
 	t.Log("Testing DEBUG server")
 
 	type fields struct {
@@ -47,13 +48,14 @@ func TestDebugServer(t *testing.T) {
 
 	tests := []struct {
 		name   string
-		fields func() fields
+		fields func(p string) fields
+		Port   string
 		want   want
 	}{
 		{
 			name: "Simple Positive Test(With out checker)",
-			fields: func() fields {
-				e := NewServer(WithDebugPort(":1111"))
+			fields: func(p string) fields {
+				e := NewServer(WithDebugPort(p))
 
 				ctx := context.Background()
 
@@ -62,6 +64,7 @@ func TestDebugServer(t *testing.T) {
 					ctx: ctx,
 				}
 			},
+			Port: getUniquePort(),
 			want: want{
 				Ready: ReadyProbeResult{
 					StatusCode: http.StatusOK,
@@ -85,8 +88,9 @@ func TestDebugServer(t *testing.T) {
 		},
 		{
 			name: "Simple Positive Test(With checker)",
-			fields: func() fields {
-				e := NewServer(WithDebugPort(":1111"))
+			Port: getUniquePort(),
+			fields: func(p string) fields {
+				e := NewServer(WithDebugPort(p))
 
 				checker := NewDefaultChecker("checker true", func(ctx context.Context) error {
 					return nil
@@ -128,8 +132,9 @@ func TestDebugServer(t *testing.T) {
 		},
 		{
 			name: "Simple Negative Test(With checker)",
-			fields: func() fields {
-				e := NewServer(WithDebugPort(":1111"))
+			Port: getUniquePort(),
+			fields: func(p string) fields {
+				e := NewServer(WithDebugPort(p))
 
 				checker := NewDefaultChecker("checker false", func(ctx context.Context) error {
 					return assert.AnError
@@ -171,10 +176,11 @@ func TestDebugServer(t *testing.T) {
 		},
 	}
 
-	// nolint:paralleltest
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			f := tt.fields()
+			t.Parallel()
+			f := tt.fields(tt.Port)
 			e := f.e
 			go func() {
 				err := e.Run()
@@ -192,7 +198,7 @@ func TestDebugServer(t *testing.T) {
 			}
 
 			// check the ready probe
-			resp, err := makeRequest(f.ctx, "http://localhost:1111/read")
+			resp, err := makeRequest(f.ctx, "http://localhost"+tt.Port+"/read")
 			tt.want.Ready.CallError(t, err)
 			if tt.want.Ready.Body != nil {
 				bodyByte, err := io.ReadAll(resp.Body)
@@ -205,7 +211,7 @@ func TestDebugServer(t *testing.T) {
 			}
 
 			// check the live probe
-			resp, err = makeRequest(f.ctx, "http://localhost:1111/live")
+			resp, err = makeRequest(f.ctx, "http://localhost"+tt.Port+"/live")
 			tt.want.Live.CallerError(t, err)
 			if tt.want.Live.Body != "" {
 				bodyByte, err := io.ReadAll(resp.Body)
@@ -215,7 +221,7 @@ func TestDebugServer(t *testing.T) {
 			}
 
 			// check the startup probe
-			resp, err = makeRequest(f.ctx, "http://localhost:1111/startup")
+			resp, err = makeRequest(f.ctx, "http://localhost"+tt.Port+"/startup")
 			tt.want.StartUp.CallerError(t, err)
 			if tt.want.StartUp.Body != "" {
 				bodyByte, err := io.ReadAll(resp.Body)
@@ -245,11 +251,28 @@ const (
 	host               = "http://localhost"
 )
 
+type portContainer struct {
+	last int
+	m    sync.Mutex
+}
+
+var pContainer = portContainer{
+	last: 1000,
+}
+
+func getUniquePort() string {
+	pContainer.m.Lock()
+	last := pContainer.last
+	new := last + 1
+	pContainer.last = new
+	pContainer.m.Unlock()
+	return fmt.Sprintf(":%d", new)
+}
+
 func TestWithDebugPort(t *testing.T) {
 	t.Parallel()
 	//get random int from 1000 to 9999
-	port := 1000 + time.Now().Nanosecond()%9000
-	portString := fmt.Sprintf(":%d", port)
+	portString := getUniquePort()
 	s := NewServer(WithDebugPort(portString))
 	assert.Equal(t, portString, s.DebugServer.PORT)
 
@@ -267,9 +290,7 @@ func TestWithDebugPort(t *testing.T) {
 
 func TestDebugPortFromEnv(t *testing.T) {
 	t.Parallel()
-	time.Sleep(5 * time.Millisecond)
-	port := 1000 + time.Now().Nanosecond()%9000
-	portString := fmt.Sprintf(":%d", port)
+	portString := getUniquePort()
 
 	//set env
 	err := os.Setenv("DEBUG_PORT", portString)
@@ -307,4 +328,40 @@ func TestServer_AddChecker(t *testing.T) {
 	s.AddChecker(checker)
 	assert.Equal(t, 1, len(s.checkersGroup))
 	assert.Equal(t, "checker", s.checkersGroup[0].GetName())
+}
+
+func TestServer_RunGroup(t *testing.T) {
+	t.Parallel()
+	port := getUniquePort()
+	s := NewServer(WithDebugPort(port))
+
+	data := make(chan int)
+
+	s.AddActor(func() error {
+		for i := 0; i < 10; i++ {
+			data <- i
+		}
+		err := s.Shutdown()
+		assert.NoError(t, err)
+		return nil
+	}, func(error) {
+		assert.NoError(t, nil)
+	})
+
+	go func() {
+		err := s.Run()
+		assert.NoError(t, err)
+	}()
+
+	value := make([]int, 0, 10)
+	for {
+		i := <-data
+		value = append(value, i)
+
+		if len(value) == 10 {
+			break
+		}
+	}
+
+	assert.Equal(t, 10, len(value))
 }
