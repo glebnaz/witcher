@@ -115,12 +115,14 @@ Your Debug server has three handlers:
 
 * /live - live probe
 
-* /ready - ready probe
+* /read - readiness probe
+
+* /startup - startup 
 
 * /metrics - Prometheus metrics
 
 #### PPROF
-You can use pprof to see the CPU and memory usage of your application on the Debug server. Go to "/" to see the start page of pprof.
+You can use pprof to see the CPU and memory usage of your application on the Debug server. Go to "/debug/pprof/" to see the start page of pprof.
 
 By default, the server is listening on port 8084. You can change the port by setting the environment variable `PORT` or by using `WithDebugPort("your_port")`.
 

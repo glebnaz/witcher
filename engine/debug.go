@@ -2,42 +2,54 @@ package engine
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"sync"
 	"time"
 
 	"github.com/glebnaz/witcher/metrics"
-	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog/log"
 )
 
 type DebugServer struct {
 	PORT string `json:"port" envconfig:"PORT" default:":8084"`
 
-	engine *echo.Echo
-	m      sync.Mutex
+	mux    *http.ServeMux
+	server *http.Server
 
-	ready    bool
-	checkers []Checker
+	m sync.RWMutex
+
+	ready         bool
+	checkersGroup []Checker
 }
 
-func NewDebugServer(port string) *DebugServer {
-	e := echo.New()
-	e.Debug = false
-	e.HideBanner = true
-	e.HidePort = true
+var readHeaderTimeout = 2 * time.Minute
 
+// NewDebugServer create new debug server
+//
+// port is debug port
+// use value with `:` for example: :8084
+func NewDebugServer(port string) *DebugServer {
 	debug := &DebugServer{
-		PORT:     port,
-		ready:    false,
-		checkers: make([]Checker, 0, 10),
+		PORT:          port,
+		ready:         false,
+		checkersGroup: make([]Checker, 0, 10),
 	}
 
-	e.GET("/ready", debug.Ready)
-	e.GET("/live", debug.Live)
-	e.GET("/metrics", echo.WrapHandler(metrics.Handler()))
-	wrapPProf(e)
-	debug.engine = e
+	mux := http.NewServeMux()
+	mux.HandleFunc("/read", debug.ReadinessProbeHandler)
+	mux.HandleFunc("/live", debug.LiveProbeHandler)
+	mux.HandleFunc("/startup", debug.StartupProbeHandler)
+	mux.Handle("/metrics", metrics.Handler())
+	wrapPProf(mux)
+
+	debug.mux = mux
+
+	debug.server = &http.Server{
+		Addr:              debug.PORT,
+		Handler:           mux,
+		ReadHeaderTimeout: readHeaderTimeout,
+	}
 
 	return debug
 }
@@ -57,10 +69,10 @@ func (d *DebugServer) SetReady(ready bool) {
 }
 
 func (d *DebugServer) AddChecker(checker Checker) {
-	log.Debug().Msgf("Adding checker %s", checker.Name())
+	log.Debug().Msgf("Adding checker %s", checker.GetName())
 	d.m.Lock()
 	defer d.m.Unlock()
-	d.checkers = append(d.checkers, checker)
+	d.checkersGroup = append(d.checkersGroup, checker)
 }
 
 // AddCheckers for check your server is live
@@ -70,50 +82,82 @@ func (d *DebugServer) AddCheckers(checkers []Checker) {
 	}
 }
 
-// Live is probe checker
-func (d *DebugServer) Live(c echo.Context) error {
-	log.Info().Msgf("Live check at %s", time.Now())
-	d.m.Lock()
-	defer d.m.Unlock()
+// ReadinessProbeHandler is probe checker for k8s readiness probe
+//
+// It will check all checkersGroup and return 200 if all checkersGroup is ok
+// or 500 if one of them is not ok
+//
+// response will be json with all checkersGroup and their status
+func (d *DebugServer) ReadinessProbeHandler(w http.ResponseWriter, req *http.Request) {
+	log.Info().Msgf("readiness probe at %s", time.Now())
+	d.m.RLock()
+	defer d.m.RUnlock()
 
 	info := make(map[string]bool)
 
 	live := true
 
-	for i := range d.checkers {
-		if err := d.checkers[i].Check(); err != nil {
-			log.Error().Msgf("Server is not live: %s", err)
+	for i := range d.checkersGroup {
+		if err := d.checkersGroup[i].Check(req.Context()); err != nil {
+			log.Error().Msgf("Server is not ready to receive traffic: %s", err)
 			live = false
-			info[d.checkers[i].Name()] = false
+			info[d.checkersGroup[i].GetName()] = false
 		} else {
-			info[d.checkers[i].Name()] = true
+			info[d.checkersGroup[i].GetName()] = true
 		}
 	}
 
-	if !live {
-		log.Error().Msgf("Server is not live")
-		return c.JSON(http.StatusInternalServerError, info)
+	jsonInfo, err := json.Marshal(info)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
-	return c.JSON(http.StatusOK, info)
+
+	if !live {
+		log.Error().Msgf("Server is not ready to receive traffic")
+		w.WriteHeader(http.StatusInternalServerError)
+		//nolint:errcheck
+		w.Write(jsonInfo)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	//nolint:errcheck
+	w.Write(jsonInfo)
 }
 
-// Ready is probe checker
-func (d *DebugServer) Ready(c echo.Context) error {
-	log.Info().Msgf("Ready check at %s", time.Now())
+// LiveProbeHandler is probe checker for k8s liveness probe
+func (d *DebugServer) LiveProbeHandler(w http.ResponseWriter, _ *http.Request) {
+	log.Info().Msgf("live probe at %s", time.Now())
+	w.WriteHeader(http.StatusOK)
+	//nolint:errcheck
+	w.Write([]byte("OK"))
+}
+
+// StartupProbeHandler is probe checker for k8s startup probe
+// ready or not ready
+// used only for start
+func (d *DebugServer) StartupProbeHandler(w http.ResponseWriter, _ *http.Request) {
+	log.Info().Msgf("StartupProbe check at %s", time.Now())
 	if d.ready {
-		return c.String(http.StatusOK, "OK")
+		w.WriteHeader(http.StatusOK)
+		// nolint:errcheck
+		w.Write([]byte("OK"))
+	} else {
+		w.WriteHeader(http.StatusInternalServerError)
+		// nolint:errcheck
+		w.Write([]byte("Not ready"))
 	}
-	return c.String(http.StatusInternalServerError, "Not ready")
 }
 
 func (d *DebugServer) RunDebug() error {
+	d.server.Addr = d.PORT
 	log.Info().Msgf("Run debug server at %s", time.Now())
-	return d.engine.Start(d.PORT)
+	return d.server.ListenAndServe()
 }
 
 func (d *DebugServer) ShutdownDebug(ctx context.Context) error {
 	log.Info().Msgf("Start shutdown debug server at %s", time.Now())
-	errShutDown := d.engine.Shutdown(ctx)
+	errShutDown := d.server.Shutdown(ctx)
 	if errShutDown != nil {
 		return errShutDown
 	}
