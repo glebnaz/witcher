@@ -18,6 +18,8 @@ type Mongo struct {
 	lock sync.RWMutex
 
 	name string
+
+	once sync.Once
 }
 
 // HealthChecker use for registration mongo health check in wither engine
@@ -35,7 +37,13 @@ func (m *Mongo) HealthChecker(timeout time.Duration) engine.Checker {
 }
 
 // Closer use for registration mongo closer in wither engine
+//
+// this func allocate new closer for mongo
+// USE IT ONLY ONE TIME
 func (m *Mongo) Closer() engine.Closer {
+	m.once.Do(func() {
+		log.Debug().Msgf("Init closer for mongo")
+	})
 	return engine.NewDefaultCloser(m.GetName(), func(ctx context.Context) error {
 		err := m.Disconnect(ctx)
 		if err != nil {
