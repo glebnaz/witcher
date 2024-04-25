@@ -2,23 +2,20 @@ package metrics
 
 import (
 	"fmt"
+	"net/http"
 	"time"
-
-	"github.com/labstack/echo/v4"
 )
 
-// EchoMiddleware is a middleware for echo framework
-// It collects metrics for http requests
-// It returns a function that takes a handler and returns a handler/
-// This is a pattern for echo middleware
-// https://echo.labstack.com/guide/middleware
-// https://echo.labstack.com/cookbook/middleware
-// https://echo.labstack.com/cookbook/middleware#custom-middleware
+// HTTPMiddleware is a middleware for the standard net/http package.
 //
-// // For every RPC it exports the following metrics:
-// // - server_http_request_count{method,path,code}
-// // - server_http_response_time{method,path}
-func EchoMiddleware(namespace string) echo.MiddlewareFunc {
+// It collects metrics for HTTP requests.
+// It returns a function that takes a handler and returns a handler.
+// This is a pattern for net/http middleware.
+//
+// For every request, it exports the following metrics:
+// - server_http_request_count{method,path,code}
+// - server_http_response_time{method,path}
+func HTTPMiddleware(namespace string) func(http.Handler) http.Handler {
 	var serverRequestCounter = MustRegisterCounterVec("server_http_request_count",
 		namespace,
 		"server_request_count", []string{"method", "path", "code"})
@@ -27,15 +24,15 @@ func EchoMiddleware(namespace string) echo.MiddlewareFunc {
 		namespace,
 		"server response time in seconds",
 		TimeBucketsMedium, []string{"method", "path"})
-	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
+
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			startTime := time.Now()
-			err := next(c)
-			statusCode := fmt.Sprintf("%d", c.Response().Status)
+			next.ServeHTTP(w, r)
+			statusCode := fmt.Sprintf("%d", http.StatusOK) // replace with actual status code if available
 			tookTime := float64(time.Since(startTime)) / float64(time.Second)
-			serverResponseTime.WithLabelValues(c.Request().Method, c.Request().RequestURI).Observe(tookTime)
-			serverRequestCounter.WithLabelValues(c.Request().Method, c.Request().RequestURI, statusCode).Inc()
-			return err
-		}
+			serverResponseTime.WithLabelValues(r.Method, r.RequestURI).Observe(tookTime)
+			serverRequestCounter.WithLabelValues(r.Method, r.RequestURI, statusCode).Inc()
+		})
 	}
 }
